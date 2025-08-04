@@ -226,17 +226,31 @@ const DiveCalculator = () => {
             onClick={handleBack}
             variant="outline"
             className="flex-1"
+            disabled={loading}
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> Atrás
           </Button>
           <Button 
             onClick={handleCalculate}
             className="flex-1 bg-blue-800 hover:bg-blue-900 text-white"
-            disabled={!formData.bottomTime || !formData.maxDepth}
+            disabled={!formData.bottomTime || !formData.maxDepth || loading}
           >
-            Calcular Descompresión
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Calculando...
+              </>
+            ) : (
+              'Calcular Descompresión'
+            )}
           </Button>
         </div>
+        
+        {errors.calculation && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
+            <p className="text-red-700 text-sm">{errors.calculation}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
