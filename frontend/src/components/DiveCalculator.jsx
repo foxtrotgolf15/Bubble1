@@ -5,8 +5,11 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
-import { AlertTriangle, Waves, Calculator, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { AlertTriangle, Waves, Calculator, ArrowLeft, ArrowRight, Loader2, Info, Droplets } from 'lucide-react';
 import axios from 'axios';
+import DiveTimer from './DiveTimer';
+import DepthImage from './DepthImage';
+import NotificationManager from './NotificationManager';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
