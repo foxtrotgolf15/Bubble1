@@ -62,7 +62,7 @@ const DiveCalculator = () => {
         const response = await axios.post(`${API}/decompression/calculate`, {
           maxDepth: parseFloat(formData.maxDepth),
           bottomTime: parseInt(formData.bottomTime),
-          altitude: parseFloat(formData.altitude),
+          altitude: formData.altitude === '' ? 0 : parseFloat(formData.altitude),
           breathingGas: formData.breathingGas,
           oxygenDeco: formData.oxygenDeco
         });
