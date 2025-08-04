@@ -46,6 +46,11 @@ class DecompressionService:
                 if entry.profundidad_m == depth]
         return sorted(list(set(times)))
     
+    def get_max_time_for_depth(self, depth: float) -> Optional[int]:
+        """Get the maximum available time for a specific depth"""
+        times = self.get_available_times_for_depth(depth)
+        return max(times) if times else None
+    
     def find_equal_or_next_greater(self, target: float, available_values: List[float]) -> float:
         """Find the equal or next greater value from available values"""
         available_values = sorted(available_values)
@@ -90,6 +95,16 @@ class DecompressionService:
         
         return stops
     
+    def calculate_time_to_first_stop(self, max_depth: float, first_stop_depth: float) -> int:
+        """Calculate time to reach first decompression stop at 9 m/min ascent rate"""
+        if not first_stop_depth:
+            return 0
+        
+        distance = max_depth - first_stop_depth
+        # 9 meters per minute ascent rate
+        time_minutes = distance / 9.0
+        return max(1, round(time_minutes))  # At least 1 minute
+    
     def calculate_decompression(
         self, 
         max_depth: float, 
@@ -110,23 +125,32 @@ class DecompressionService:
             
             # Step 3: Get available times for the rounded depth
             available_times = self.get_available_times_for_depth(rounded_depth)
+            max_time = self.get_max_time_for_depth(rounded_depth)
             
-            # Step 4: Round time to equal or next greater available time
+            # Step 4: Check if bottom time exceeds maximum available for this depth
+            if max_time and bottom_time > max_time:
+                raise Exception("No se puede tabular esa inmersión por demasiada exposición.")
+            
+            # Step 5: Round time to equal or next greater available time
             rounded_time = int(self.find_equal_or_next_greater(bottom_time, available_times))
             
-            # Step 5: Find the exact table entry
+            # Step 6: Find the exact table entry
             table_entry = self.find_table_entry(rounded_depth, rounded_time)
             
             if not table_entry:
                 raise Exception(f"No table entry found for depth {rounded_depth}m and time {rounded_time} minutes")
             
-            # Step 6: Extract decompression stops
+            # Step 7: Extract decompression stops
             decompression_stops = self.extract_decompression_stops(table_entry)
             
-            # Step 7: Determine if this is a no-decompression dive
+            # Step 8: Determine if this is a no-decompression dive
             no_deco_dive = len(decompression_stops) == 0
             
-            # Step 8: Build the result
+            # Step 9: Calculate time to first stop
+            first_stop_depth = decompression_stops[0].depth if decompression_stops else None
+            time_to_first_stop = self.calculate_time_to_first_stop(max_depth, first_stop_depth) if first_stop_depth else 0
+            
+            # Step 10: Build the result
             result = DecompressionResult(
                 noDecompressionDive=no_deco_dive,
                 decompressionStops=decompression_stops,
@@ -138,7 +162,8 @@ class DecompressionService:
                 breathingGas=breathing_gas,
                 oxygenDeco=oxygen_deco,
                 totalAscentTime=table_entry.tiempo_total_ascenso,
-                repetitiveGroup=table_entry.grupo_repeticion
+                repetitiveGroup=table_entry.grupo_repeticion,
+                timeToFirstStop=time_to_first_stop  # Add this new field
             )
             
             logger.info(f"Calculated decompression for {max_depth}m/{bottom_time}min -> {rounded_depth}m/{rounded_time}min, No-deco: {no_deco_dive}, Stops: {len(decompression_stops)}")
@@ -147,7 +172,7 @@ class DecompressionService:
             
         except Exception as e:
             logger.error(f"Decompression calculation failed: {e}")
-            raise Exception(f"Calculation error: {e}")
+            raise Exception(f"{e}")
 
 # Global service instance
 decompression_service = DecompressionService()

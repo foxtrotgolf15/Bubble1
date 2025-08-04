@@ -33,6 +33,7 @@ class DecompressionResult(BaseModel):
     oxygenDeco: str
     totalAscentTime: str
     repetitiveGroup: str
+    timeToFirstStop: Optional[int] = 0  # New field for time to first stop
 
 class TableEntry(BaseModel):
     profundidad_m: float = Field(..., alias="Profundidad (m)")
