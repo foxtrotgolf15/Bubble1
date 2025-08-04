@@ -198,27 +198,33 @@ frontend:
 backend:
   - task: "Decompression Calculation API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "Backend API endpoint for decompression calculations using US Navy Rev 7 table"
+        -working: true
+        -agent: "testing"
+        -comment: "PASSED - Backend API working correctly. Decompression calculation endpoint responding properly, US Navy Rev 7 table data loaded and accessible, API returns accurate decompression results based on input parameters"
 
   - task: "Decompression Service Logic"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/decompression_service.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "Core decompression calculation logic with table lookup and stop extraction"
+        -working: true
+        -agent: "testing"
+        -comment: "PASSED - Decompression service logic working correctly. Table lookup functioning properly, depth and time rounding to next available values working, decompression stop extraction accurate, no-decompression dive detection working correctly"
 
 metadata:
   created_by: "testing_agent"
