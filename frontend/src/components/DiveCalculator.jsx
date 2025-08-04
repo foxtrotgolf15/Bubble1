@@ -52,17 +52,34 @@ const DiveCalculator = () => {
     }
   };
 
-  const handleCalculate = () => {
+  const handleCalculate = async () => {
     if (validateScreen2()) {
-      const calculationResults = mockCalculateDecompression(
-        parseFloat(formData.maxDepth),
-        parseFloat(formData.bottomTime),
-        parseFloat(formData.altitude),
-        formData.breathingGas,
-        formData.oxygenDeco
-      );
-      setResults(calculationResults);
-      setCurrentScreen(3);
+      setLoading(true);
+      setErrors({});
+      
+      try {
+        const response = await axios.post(`${API}/decompression/calculate`, {
+          maxDepth: parseFloat(formData.maxDepth),
+          bottomTime: parseInt(formData.bottomTime),
+          altitude: parseFloat(formData.altitude),
+          breathingGas: formData.breathingGas,
+          oxygenDeco: formData.oxygenDeco
+        });
+        
+        setResults(response.data);
+        setCurrentScreen(3);
+      } catch (error) {
+        console.error('Error calculating decompression:', error);
+        let errorMessage = 'Error al calcular la descompresión. Verifique sus datos e intente nuevamente.';
+        
+        if (error.response?.data?.detail) {
+          errorMessage = error.response.data.detail;
+        }
+        
+        setErrors({ calculation: errorMessage });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
