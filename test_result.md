@@ -232,14 +232,107 @@ metadata:
   test_sequence: 1
   run_ui: true
 
+  - task: "Enhanced Timers and Alerts (Screen 3)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveTimer.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing enhanced timer functionality with Start, Pause, Reset buttons, MM:SS formatting, countdown functionality, progress bars, and visual indicators"
+
+  - task: "Depth Images Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DepthImage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing depth image loading for available depths (9.1, 10.7, 12.2, 13.7, 15.2, 16.8, 18.3, 21.3, 24.4, 27.4), placeholder for unavailable depths, and image subtitle display"
+
+  - task: "Hydration Message Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing hydration reminder message with droplet icon and cyan color scheme"
+
+  - task: "Simplified Summary Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing simplified summary with 'Tabulación utilizada' instead of 'Valores Redondeados Utilizados', only 'US Navy Rev 7 – Tabla de Aire I' in table field, and removal of 'Otros Parámetros' section"
+
+  - task: "Long Dive Validation"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing validation for excessive bottom time with error message 'No se puede tabular esa inmersión por demasiada exposición'"
+
+  - task: "Screen 2 Informational Note"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing blue info box with US Navy Rev7 safety message on parameters screen"
+
+  - task: "Notification Management"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/NotificationManager.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing notification permission request banner and banner dismissal functionality"
+
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Enhanced Timers and Alerts (Screen 3)"
+    - "Depth Images Display"
+    - "Hydration Message Display"
+    - "Simplified Summary Display"
+    - "Long Dive Validation"
+    - "Screen 2 Informational Note"
+    - "Notification Management"
   stuck_tasks: []
   test_all: false
-  test_priority: "completed"
+  test_priority: "high_first"
 
 agent_communication:
     -agent: "testing"
     -message: "Starting comprehensive testing of Spanish dive decompression calculator with all specified test cases including no decompression, single stop, multiple stops, validation, and navigation flow"
     -agent: "testing"
     -message: "TESTING COMPLETED SUCCESSFULLY - All major functionality working correctly. Spanish interface verified, navigation flow tested, form validation working, API integration functional, and decompression calculations accurate. Test Case 1 (no decompression) passed, Test Case 3 (multiple stops) showed single stop which is correct based on US Navy Rev 7 table data. Minor observation: Test Case 2 showed no decompression instead of expected single stop, but this appears to be accurate based on the decompression table data for 18m/45min parameters."
+    -agent: "testing"
+    -message: "Starting testing of ENHANCED FEATURES: Timers and Alerts, Depth Images, Hydration Message, Simplified Summary, Long Dive Validation, Screen 2 Informational Note, and Notification Management as requested in the review"
