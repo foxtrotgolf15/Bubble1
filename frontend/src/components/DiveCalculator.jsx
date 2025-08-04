@@ -13,6 +13,7 @@ const API = `${BACKEND_URL}/api`;
 
 const DiveCalculator = () => {
   const [currentScreen, setCurrentScreen] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     decompTableType: 'US Navy Rev 7',
     altitude: '',
