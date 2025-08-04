@@ -273,104 +273,179 @@ const DiveCalculator = () => {
     </Card>
   );
 
-  const renderScreen3 = () => (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-teal-900 to-teal-700 text-white rounded-t-lg">
-        <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="h-6 w-6" />
-          Resultados de Descompresión - Pantalla 3 de 3
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6 space-y-8">
-        {/* Decompression Stops */}
-        <div>
-          <h3 className="text-xl font-semibold text-slate-800 mb-4">Paradas de Descompresión</h3>
-          {results?.noDecompressionDive ? (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-800 font-semibold text-lg">
-                No se requieren paradas de descompresión.
+  const renderScreen3 = () => {
+    if (errors.calculation) {
+      return (
+        <Card className="w-full max-w-2xl mx-auto">
+          <CardHeader className="bg-gradient-to-r from-red-900 to-red-700 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-6 w-6" />
+              Error de Cálculo
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+              <AlertTriangle className="w-12 h-12 mx-auto text-red-600 mb-4" />
+              <h3 className="text-lg font-semibold text-red-800 mb-2">
+                {errors.calculation}
+              </h3>
+              <p className="text-red-700 mb-6">
+                Revise los parámetros de inmersión e intente nuevamente con valores dentro del rango de las tablas.
               </p>
+              <Button 
+                onClick={handleBack}
+                className="bg-red-800 hover:bg-red-900 text-white"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" /> Volver a Parámetros
+              </Button>
             </div>
-          ) : (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <ul className="space-y-2">
-                {results?.decompressionStops.map((stop, index) => (
-                  <li key={index} className="flex items-center text-orange-800 font-medium">
-                    <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
-                    {stop.depth} m durante {stop.duration} minutos
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
+      );
+    }
 
-        {/* Dive Summary */}
-        <div>
-          <h3 className="text-xl font-semibold text-slate-800 mb-4">Resumen de Inmersión</h3>
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Datos Reales Ingresados:</h4>
-                <p className="text-slate-600">Tiempo de Fondo: {results?.actualInputs.bottomTime} minutos</p>
-                <p className="text-slate-600">Profundidad Máxima: {results?.actualInputs.depth} m</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Valores Redondeados Utilizados:</h4>
-                <p className="text-slate-600">Profundidad: {results?.roundedValues.depth} m</p>
-                <p className="text-slate-600">Tiempo: {results?.roundedValues.time} minutos</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Tabla Utilizada:</h4>
-                <p className="text-slate-600">{results?.tableUsed}</p>
-                <p className="text-slate-600 text-sm">Profundidad: {results?.roundedValues.depth}m / Tiempo: {results?.roundedValues.time}min</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Otros Parámetros:</h4>
-                <p className="text-slate-600">Altitud: {results?.altitude} m</p>
-                <p className="text-slate-600">Gas Respiratorio: {results?.breathingGas}</p>
-                <p className="text-slate-600">Descompresión O₂: {results?.oxygenDeco}</p>
-                <p className="text-slate-600">Tiempo Total de Ascenso: {results?.totalAscentTime}</p>
-                <p className="text-slate-600">Grupo Repetitivo: {results?.repetitiveGroup}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Safety Reminder */}
-        {!results?.noDecompressionDive && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+    return (
+      <Card className="w-full max-w-5xl mx-auto">
+        <CardHeader className="bg-gradient-to-r from-teal-900 to-teal-700 text-white rounded-t-lg">
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-6 w-6" />
+            Resultados de Descompresión - Pantalla 3 de 3
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-8">
+          <NotificationManager />
+          
+          {/* Hydration Reminder */}
+          <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+              <Droplets className="h-6 w-6 text-cyan-600 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-red-800 mb-2">Recordatorio de Seguridad</h4>
-                <p className="text-red-700">
-                  Siga todas las paradas exactamente. Ascienda lentamente y realice una parada de seguridad si es recomendado.
-                  Nunca exceda la velocidad de ascenso y siempre priorice la seguridad sobre el horario.
+                <h4 className="font-semibold text-cyan-800 mb-2">¡Recuerda!</h4>
+                <p className="text-cyan-700">
+                  Hidrátate bien desde que sales del agua: bebe agua o una bebida con electrolitos y sigue hidratándote durante las siguientes horas.
                 </p>
               </div>
             </div>
           </div>
-        )}
 
-        <div className="flex gap-4 pt-4">
-          <Button 
-            onClick={handleBack}
-            variant="outline"
-            className="flex-1"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Volver
-          </Button>
-          <Button 
-            onClick={handleStartNew}
-            className="flex-1 bg-teal-800 hover:bg-teal-900 text-white"
-          >
-            Nueva Inmersión
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+          {/* Depth Reference Image */}
+          <div className="flex justify-center">
+            <DepthImage 
+              depth={results?.roundedValues.depth} 
+              className="max-w-md"
+            />
+          </div>
+
+          {/* Time to First Stop Timer */}
+          {!results?.noDecompressionDive && results?.timeToFirstStop > 0 && (
+            <div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">Tiempo hasta la Primera Parada</h3>
+              <DiveTimer
+                label="Tiempo hasta la primera parada"
+                initialMinutes={results.timeToFirstStop}
+                onComplete={() => console.log('Time to first stop completed')}
+                className="max-w-md mx-auto"
+                isActive={true}
+              />
+            </div>
+          )}
+
+          {/* Decompression Stops with Timers */}
+          <div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Paradas de Descompresión</h3>
+            {results?.noDecompressionDive ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-green-800 font-semibold text-lg">
+                  No se requieren paradas de descompresión.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {results?.decompressionStops.map((stop, index) => (
+                  <DiveTimer
+                    key={index}
+                    label={`Parada en ${stop.depth} m: ${stop.duration} min`}
+                    initialMinutes={stop.duration}
+                    onComplete={() => console.log(`Stop at ${stop.depth}m completed`)}
+                    className=""
+                    isActive={false}
+                  />
+                ))}
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                  <p className="text-blue-800 font-medium">
+                    Sigue el plan. Te avisaremos cuando cada parada termine.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Simplified Dive Summary */}
+          <div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Resumen de Inmersión</h3>
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-slate-700 mb-3">Datos Reales Ingresados:</h4>
+                  <p className="text-slate-600">Tiempo de Fondo: {results?.actualInputs.bottomTime} minutos</p>
+                  <p className="text-slate-600">Profundidad Máxima: {results?.actualInputs.depth} m</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-slate-700 mb-3">Tabulación utilizada:</h4>
+                  <p className="text-slate-600">Profundidad: {results?.roundedValues.depth} m</p>
+                  <p className="text-slate-600">Tiempo: {results?.roundedValues.time} minutos</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-slate-700 mb-3">Tabla Utilizada:</h4>
+                  <p className="text-slate-600">US Navy Rev 7 – Tabla de Aire I</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-slate-700 mb-3">Grupo Repetitivo:</h4>
+                  <p className="text-slate-600">{results?.repetitiveGroup}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Safety Reminder */}
+          {!results?.noDecompressionDive && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-red-800 mb-2">Recordatorio de Seguridad</h4>
+                  <p className="text-red-700">
+                    Siga todas las paradas exactamente. Ascienda lentamente y realice una parada de seguridad si es recomendado.
+                    Nunca exceda la velocidad de ascenso y siempre priorice la seguridad sobre el horario.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-4 pt-4">
+            <Button 
+              onClick={handleBack}
+              variant="outline"
+              className="flex-1"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+            </Button>
+            <Button 
+              onClick={handleStartNew}
+              className="flex-1 bg-teal-800 hover:bg-teal-900 text-white"
+            >
+              Nueva Inmersión
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
