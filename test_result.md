@@ -101,3 +101,125 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Test the complete Spanish dive decompression calculator app thoroughly with three-screen workflow using real US Navy Rev 7 decompression table via backend API"
+
+frontend:
+  - task: "Screen 1 - Datos de Inmersión Form"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Initial testing - Screen 1 with altitude validation, fixed selections, oxygen decompression dropdown, and navigation"
+
+  - task: "Screen 2 - Parámetros de Inmersión Form"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Initial testing - Screen 2 with bottom time and depth validation, loading states, and API integration"
+
+  - task: "Screen 3 - Resultados de Descompresión Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Initial testing - Screen 3 with decompression results display, dive summary, and safety warnings"
+
+  - task: "Form Validation and Error Handling"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing input validation for altitude, bottom time, and depth with Spanish error messages"
+
+  - task: "Navigation Flow Between Screens"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing complete navigation flow: Screen 1 → 2 → 3, back navigation, and Nueva Inmersión reset"
+
+  - task: "API Integration with Backend"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DiveCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing real backend API calls for decompression calculations and error handling"
+
+backend:
+  - task: "Decompression Calculation API"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Backend API endpoint for decompression calculations using US Navy Rev 7 table"
+
+  - task: "Decompression Service Logic"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/decompression_service.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Core decompression calculation logic with table lookup and stop extraction"
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Screen 1 - Datos de Inmersión Form"
+    - "Screen 2 - Parámetros de Inmersión Form"
+    - "Screen 3 - Resultados de Descompresión Display"
+    - "Form Validation and Error Handling"
+    - "Navigation Flow Between Screens"
+    - "API Integration with Backend"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+    -agent: "testing"
+    -message: "Starting comprehensive testing of Spanish dive decompression calculator with all specified test cases including no decompression, single stop, multiple stops, validation, and navigation flow"
