@@ -54,4 +54,4 @@ class TableEntry(BaseModel):
     grupo_repeticion: str = Field(..., alias="Grupo Repetición")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
