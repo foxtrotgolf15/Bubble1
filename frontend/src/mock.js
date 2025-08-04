@@ -1,4 +1,4 @@
-// Mock data for development
+// Datos simulados para desarrollo
 export const mockDecompressionTable = [
   {
     "Profundidad (m)": 12.2,
@@ -39,20 +39,20 @@ export const mockDecompressionTable = [
   }
 ];
 
-// Mock calculation function
+// Función de cálculo simulada
 export const mockCalculateDecompression = (depth, bottomTime, altitude, breathingGas, oxygenDeco) => {
-  // Find the appropriate entry in mock table (simplified logic)
-  const roundedDepth = Math.ceil(depth / 3) * 3; // Round to nearest available depth
-  const roundedTime = Math.ceil(bottomTime / 10) * 10; // Round to nearest available time
+  // Encontrar la entrada apropiada en la tabla simulada (lógica simplificada)
+  const roundedDepth = Math.ceil(depth / 3) * 3; // Redondear a la profundidad disponible más cercana
+  const roundedTime = Math.ceil(bottomTime / 10) * 10; // Redondear al tiempo disponible más cercano
   
-  // Simple mock logic - return different results based on depth
+  // Lógica simulada simple - devolver diferentes resultados basados en la profundidad
   if (depth <= 10) {
     return {
       noDecompressionDive: true,
       decompressionStops: [],
       actualInputs: { depth, bottomTime },
       roundedValues: { depth: roundedDepth, time: roundedTime },
-      tableUsed: "US Navy Rev 7 – Air Table I",
+      tableUsed: "US Navy Rev 7 – Tabla de Aire I",
       altitude,
       breathingGas,
       oxygenDeco,
@@ -67,7 +67,7 @@ export const mockCalculateDecompression = (depth, bottomTime, altitude, breathin
       ],
       actualInputs: { depth, bottomTime },
       roundedValues: { depth: roundedDepth, time: roundedTime },
-      tableUsed: "US Navy Rev 7 – Air Table I",
+      tableUsed: "US Navy Rev 7 – Tabla de Aire I",
       altitude,
       breathingGas,
       oxygenDeco,
@@ -83,7 +83,7 @@ export const mockCalculateDecompression = (depth, bottomTime, altitude, breathin
       ],
       actualInputs: { depth, bottomTime },
       roundedValues: { depth: roundedDepth, time: roundedTime },
-      tableUsed: "US Navy Rev 7 – Air Table I",
+      tableUsed: "US Navy Rev 7 – Tabla de Aire I",
       altitude,
       breathingGas,
       oxygenDeco,

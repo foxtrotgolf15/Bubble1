@@ -13,7 +13,7 @@ const DiveCalculator = () => {
   const [formData, setFormData] = useState({
     decompTableType: 'US Navy Rev 7',
     altitude: '',
-    breathingGas: 'Air',
+    breathingGas: 'Aire',
     oxygenDeco: 'No',
     bottomTime: '',
     maxDepth: ''
@@ -24,7 +24,7 @@ const DiveCalculator = () => {
   const validateScreen1 = () => {
     const newErrors = {};
     if (!formData.altitude || formData.altitude < 0) {
-      newErrors.altitude = 'Altitude must be 0 or greater';
+      newErrors.altitude = 'La altitud debe ser 0 o mayor';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -33,10 +33,10 @@ const DiveCalculator = () => {
   const validateScreen2 = () => {
     const newErrors = {};
     if (!formData.bottomTime || formData.bottomTime <= 0) {
-      newErrors.bottomTime = 'Bottom time must be a positive number';
+      newErrors.bottomTime = 'El tiempo de fondo debe ser un número positivo';
     }
     if (!formData.maxDepth || formData.maxDepth <= 0) {
-      newErrors.maxDepth = 'Maximum depth must be a positive number';
+      newErrors.maxDepth = 'La profundidad máxima debe ser un número positivo';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -73,7 +73,7 @@ const DiveCalculator = () => {
     setFormData({
       decompTableType: 'US Navy Rev 7',
       altitude: '',
-      breathingGas: 'Air',
+      breathingGas: 'Aire',
       oxygenDeco: 'No',
       bottomTime: '',
       maxDepth: ''
@@ -87,31 +87,31 @@ const DiveCalculator = () => {
       <CardHeader className="bg-gradient-to-r from-slate-900 to-slate-700 text-white rounded-t-lg">
         <CardTitle className="flex items-center gap-2">
           <Waves className="h-6 w-6" />
-          Dive Input - Screen 1 of 3
+          Datos de Inmersión - Pantalla 1 de 3
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         <div>
           <Label htmlFor="decompTable" className="text-base font-medium text-slate-700">
-            Decompression Table Type
+            Tipo de Tabla de Descompresión
           </Label>
           <div className="mt-2">
             <Badge variant="secondary" className="bg-slate-100 text-slate-800 font-medium px-3 py-1">
               US Navy Rev 7
             </Badge>
-            <p className="text-sm text-slate-600 mt-1">Fixed selection - US Navy Revision 7 Air Table</p>
+            <p className="text-sm text-slate-600 mt-1">Selección fija - Tabla de Aire US Navy Revisión 7</p>
           </div>
         </div>
 
         <div>
           <Label htmlFor="altitude" className="text-base font-medium text-slate-700">
-            Altitude Above Sea Level (m)
+            Altitud sobre el Nivel del Mar (m)
           </Label>
           <Input
             id="altitude"
             type="number"
             min="0"
-            placeholder="Enter altitude in meters"
+            placeholder="Ingrese la altitud en metros"
             value={formData.altitude}
             onChange={(e) => setFormData({...formData, altitude: e.target.value})}
             className={`mt-2 ${errors.altitude ? 'border-red-500' : ''}`}
@@ -121,26 +121,26 @@ const DiveCalculator = () => {
 
         <div>
           <Label htmlFor="breathingGas" className="text-base font-medium text-slate-700">
-            Breathing Gas
+            Gas Respiratorio
           </Label>
           <div className="mt-2">
             <Badge variant="secondary" className="bg-slate-100 text-slate-800 font-medium px-3 py-1">
-              Air
+              Aire
             </Badge>
-            <p className="text-sm text-slate-600 mt-1">Fixed selection - Air breathing gas</p>
+            <p className="text-sm text-slate-600 mt-1">Selección fija - Gas respiratorio Aire</p>
           </div>
         </div>
 
         <div>
           <Label htmlFor="oxygenDeco" className="text-base font-medium text-slate-700">
-            Oxygen Decompression
+            Descompresión con Oxígeno
           </Label>
           <Select value={formData.oxygenDeco} onValueChange={(value) => setFormData({...formData, oxygenDeco: value})}>
             <SelectTrigger className="mt-2">
-              <SelectValue placeholder="Select oxygen decompression option" />
+              <SelectValue placeholder="Seleccione opción de descompresión con oxígeno" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="Sí">Sí</SelectItem>
               <SelectItem value="No">No</SelectItem>
             </SelectContent>
           </Select>
@@ -151,7 +151,7 @@ const DiveCalculator = () => {
             onClick={handleNext} 
             className="w-full bg-slate-800 hover:bg-slate-900 text-white"
           >
-            Next <ArrowRight className="ml-2 h-4 w-4" />
+            Siguiente <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </CardContent>
@@ -163,19 +163,19 @@ const DiveCalculator = () => {
       <CardHeader className="bg-gradient-to-r from-blue-900 to-blue-700 text-white rounded-t-lg">
         <CardTitle className="flex items-center gap-2">
           <Calculator className="h-6 w-6" />
-          Dive Parameters - Screen 2 of 3
+          Parámetros de Inmersión - Pantalla 2 de 3
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         <div>
           <Label htmlFor="bottomTime" className="text-base font-medium text-slate-700">
-            Bottom Time (minutes)
+            Tiempo de Fondo (minutos)
           </Label>
           <Input
             id="bottomTime"
             type="number"
             min="1"
-            placeholder="Enter bottom time in minutes"
+            placeholder="Ingrese el tiempo de fondo en minutos"
             value={formData.bottomTime}
             onChange={(e) => setFormData({...formData, bottomTime: e.target.value})}
             className={`mt-2 ${errors.bottomTime ? 'border-red-500' : ''}`}
@@ -185,14 +185,14 @@ const DiveCalculator = () => {
 
         <div>
           <Label htmlFor="maxDepth" className="text-base font-medium text-slate-700">
-            Maximum Depth (m)
+            Profundidad Máxima (m)
           </Label>
           <Input
             id="maxDepth"
             type="number"
             min="1"
             step="0.1"
-            placeholder="Enter maximum depth in meters"
+            placeholder="Ingrese la profundidad máxima en metros"
             value={formData.maxDepth}
             onChange={(e) => setFormData({...formData, maxDepth: e.target.value})}
             className={`mt-2 ${errors.maxDepth ? 'border-red-500' : ''}`}
@@ -206,14 +206,14 @@ const DiveCalculator = () => {
             variant="outline"
             className="flex-1"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> Atrás
           </Button>
           <Button 
             onClick={handleCalculate}
             className="flex-1 bg-blue-800 hover:bg-blue-900 text-white"
             disabled={!formData.bottomTime || !formData.maxDepth}
           >
-            Calculate Decompression
+            Calcular Descompresión
           </Button>
         </div>
       </CardContent>
@@ -225,17 +225,17 @@ const DiveCalculator = () => {
       <CardHeader className="bg-gradient-to-r from-teal-900 to-teal-700 text-white rounded-t-lg">
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-6 w-6" />
-          Decompression Results - Screen 3 of 3
+          Resultados de Descompresión - Pantalla 3 de 3
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-8">
         {/* Decompression Stops */}
         <div>
-          <h3 className="text-xl font-semibold text-slate-800 mb-4">Decompression Stops</h3>
+          <h3 className="text-xl font-semibold text-slate-800 mb-4">Paradas de Descompresión</h3>
           {results?.noDecompressionDive ? (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <p className="text-green-800 font-semibold text-lg">
-                No decompression stops required.
+                No se requieren paradas de descompresión.
               </p>
             </div>
           ) : (
@@ -244,7 +244,7 @@ const DiveCalculator = () => {
                 {results?.decompressionStops.map((stop, index) => (
                   <li key={index} className="flex items-center text-orange-800 font-medium">
                     <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
-                    {stop.depth} m for {stop.duration} minutes
+                    {stop.depth} m durante {stop.duration} minutos
                   </li>
                 ))}
               </ul>
@@ -254,31 +254,31 @@ const DiveCalculator = () => {
 
         {/* Dive Summary */}
         <div>
-          <h3 className="text-xl font-semibold text-slate-800 mb-4">Dive Summary</h3>
+          <h3 className="text-xl font-semibold text-slate-800 mb-4">Resumen de Inmersión</h3>
           <div className="bg-slate-50 border border-slate-200 rounded-lg p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Actual User Inputs:</h4>
-                <p className="text-slate-600">Bottom Time: {results?.actualInputs.bottomTime} minutes</p>
-                <p className="text-slate-600">Maximum Depth: {results?.actualInputs.depth} m</p>
+                <h4 className="font-semibold text-slate-700 mb-3">Datos Reales Ingresados:</h4>
+                <p className="text-slate-600">Tiempo de Fondo: {results?.actualInputs.bottomTime} minutos</p>
+                <p className="text-slate-600">Profundidad Máxima: {results?.actualInputs.depth} m</p>
               </div>
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Rounded Values Used:</h4>
-                <p className="text-slate-600">Depth: {results?.roundedValues.depth} m</p>
-                <p className="text-slate-600">Time: {results?.roundedValues.time} minutes</p>
+                <h4 className="font-semibold text-slate-700 mb-3">Valores Redondeados Utilizados:</h4>
+                <p className="text-slate-600">Profundidad: {results?.roundedValues.depth} m</p>
+                <p className="text-slate-600">Tiempo: {results?.roundedValues.time} minutos</p>
               </div>
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Table Used:</h4>
+                <h4 className="font-semibold text-slate-700 mb-3">Tabla Utilizada:</h4>
                 <p className="text-slate-600">{results?.tableUsed}</p>
-                <p className="text-slate-600 text-sm">Depth: {results?.roundedValues.depth}m / Time: {results?.roundedValues.time}min</p>
+                <p className="text-slate-600 text-sm">Profundidad: {results?.roundedValues.depth}m / Tiempo: {results?.roundedValues.time}min</p>
               </div>
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Other Parameters:</h4>
-                <p className="text-slate-600">Altitude: {results?.altitude} m</p>
-                <p className="text-slate-600">Breathing Gas: {results?.breathingGas}</p>
-                <p className="text-slate-600">Oxygen Deco: {results?.oxygenDeco}</p>
-                <p className="text-slate-600">Total Ascent Time: {results?.totalAscentTime}</p>
-                <p className="text-slate-600">Repetitive Group: {results?.repetitiveGroup}</p>
+                <h4 className="font-semibold text-slate-700 mb-3">Otros Parámetros:</h4>
+                <p className="text-slate-600">Altitud: {results?.altitude} m</p>
+                <p className="text-slate-600">Gas Respiratorio: {results?.breathingGas}</p>
+                <p className="text-slate-600">Descompresión O₂: {results?.oxygenDeco}</p>
+                <p className="text-slate-600">Tiempo Total de Ascenso: {results?.totalAscentTime}</p>
+                <p className="text-slate-600">Grupo Repetitivo: {results?.repetitiveGroup}</p>
               </div>
             </div>
           </div>
@@ -290,10 +290,10 @@ const DiveCalculator = () => {
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-red-800 mb-2">Safety Reminder</h4>
+                <h4 className="font-semibold text-red-800 mb-2">Recordatorio de Seguridad</h4>
                 <p className="text-red-700">
-                  Follow all stops exactly. Ascend slowly and perform a safety stop if recommended.
-                  Never exceed the ascent rate and always prioritize safety over schedule.
+                  Siga todas las paradas exactamente. Ascienda lentamente y realice una parada de seguridad si es recomendado.
+                  Nunca exceda la velocidad de ascenso y siempre priorice la seguridad sobre el horario.
                 </p>
               </div>
             </div>
@@ -306,13 +306,13 @@ const DiveCalculator = () => {
             variant="outline"
             className="flex-1"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> Volver
           </Button>
           <Button 
             onClick={handleStartNew}
             className="flex-1 bg-teal-800 hover:bg-teal-900 text-white"
           >
-            Start New Dive
+            Nueva Inmersión
           </Button>
         </div>
       </CardContent>
@@ -324,10 +324,10 @@ const DiveCalculator = () => {
       <div className="container mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-slate-800 mb-2">
-            Dive Decompression Calculator
+            Calculadora de Descompresión de Buceo
           </h1>
           <p className="text-slate-600 text-lg">
-            US Navy Rev 7 Air Decompression Table for Simple Dives
+            Tabla de Descompresión de Aire US Navy Rev 7 para Inmersiones Simples
           </p>
         </div>
 
