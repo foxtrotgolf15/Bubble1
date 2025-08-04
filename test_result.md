@@ -233,16 +233,10 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "Screen 1 - Datos de Inmersión Form"
-    - "Screen 2 - Parámetros de Inmersión Form"
-    - "Screen 3 - Resultados de Descompresión Display"
-    - "Form Validation and Error Handling"
-    - "Navigation Flow Between Screens"
-    - "API Integration with Backend"
+  current_focus: []
   stuck_tasks: []
-  test_all: true
-  test_priority: "high_first"
+  test_all: false
+  test_priority: "completed"
 
 agent_communication:
     -agent: "testing"
