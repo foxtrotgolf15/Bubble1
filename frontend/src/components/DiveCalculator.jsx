@@ -133,12 +133,13 @@ const DiveCalculator = () => {
             id="altitude"
             type="number"
             min="0"
-            placeholder="Ingrese la altitud en metros"
+            placeholder="Ingrese la altitud en metros (por defecto: 0m)"
             value={formData.altitude}
             onChange={(e) => setFormData({...formData, altitude: e.target.value})}
             className={`mt-2 ${errors.altitude ? 'border-red-500' : ''}`}
           />
           {errors.altitude && <p className="text-red-500 text-sm mt-1">{errors.altitude}</p>}
+          <p className="text-sm text-slate-500 mt-1">Si no especifica, se usará 0m (nivel del mar)</p>
         </div>
 
         <div>
