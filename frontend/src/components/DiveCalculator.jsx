@@ -27,7 +27,8 @@ const DiveCalculator = () => {
 
   const validateScreen1 = () => {
     const newErrors = {};
-    if (!formData.altitude || formData.altitude < 0) {
+    const altitudeValue = formData.altitude === '' ? 0 : parseFloat(formData.altitude);
+    if (altitudeValue < 0) {
       newErrors.altitude = 'La altitud debe ser 0 o mayor';
     }
     setErrors(newErrors);
