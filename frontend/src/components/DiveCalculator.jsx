@@ -5,11 +5,12 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
-import { AlertTriangle, Waves, Calculator, ArrowLeft, ArrowRight, Loader2, Info, Droplets } from 'lucide-react';
+import { AlertTriangle, Waves, Calculator, ArrowLeft, ArrowRight, Loader2, Info } from 'lucide-react';
 import axios from 'axios';
 import DiveTimer from './DiveTimer';
 import DepthImage from './DepthImage';
 import NotificationManager from './NotificationManager';
+import { getRepetitiveGroupRecommendation, getOrdinalInSpanish } from '../utils/repetitiveGroupUtils';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -20,7 +21,7 @@ const DiveCalculator = () => {
   const [timerStates, setTimerStates] = useState({}); // Persist timer states
   const [formData, setFormData] = useState({
     decompTableType: 'US Navy Rev 7',
-    altitude: '',
+    altitude: 0, // Default to 0
     breathingGas: 'Aire',
     oxygenDeco: 'No',
     bottomTime: '',
@@ -98,7 +99,7 @@ const DiveCalculator = () => {
     setCurrentScreen(1);
     setFormData({
       decompTableType: 'US Navy Rev 7',
-      altitude: '',
+      altitude: 0,
       breathingGas: 'Aire',
       oxygenDeco: 'No',
       bottomTime: '',
@@ -119,42 +120,39 @@ const DiveCalculator = () => {
       <CardContent className="p-6 space-y-6">
         <div>
           <Label htmlFor="decompTable" className="text-base font-medium text-slate-700">
-            Tipo de Tabla de Descompresión
+            Tablas de descompresión utilizadas
           </Label>
           <div className="mt-2">
             <Badge variant="secondary" className="bg-slate-100 text-slate-800 font-medium px-3 py-1">
               US Navy Rev 7
             </Badge>
-            <p className="text-sm text-slate-600 mt-1">Selección fija - Tabla de Aire US Navy Revisión 7</p>
           </div>
         </div>
 
         <div>
           <Label htmlFor="altitude" className="text-base font-medium text-slate-700">
-            Altitud sobre el Nivel del Mar (m)
+            Altitud (metros)
           </Label>
           <Input
             id="altitude"
             type="number"
             min="0"
-            placeholder="Ingrese la altitud en metros (por defecto: 0m)"
+            placeholder="0"
             value={formData.altitude}
             onChange={(e) => setFormData({...formData, altitude: e.target.value})}
             className={`mt-2 ${errors.altitude ? 'border-red-500' : ''}`}
           />
           {errors.altitude && <p className="text-red-500 text-sm mt-1">{errors.altitude}</p>}
-          <p className="text-sm text-slate-500 mt-1">Si no especifica, se usará 0m (nivel del mar)</p>
         </div>
 
         <div>
           <Label htmlFor="breathingGas" className="text-base font-medium text-slate-700">
-            Gas Respiratorio
+            Gas respirado
           </Label>
           <div className="mt-2">
             <Badge variant="secondary" className="bg-slate-100 text-slate-800 font-medium px-3 py-1">
               Aire
             </Badge>
-            <p className="text-sm text-slate-600 mt-1">Selección fija - Gas respiratorio Aire</p>
           </div>
         </div>
 
@@ -315,44 +313,23 @@ const DiveCalculator = () => {
         <CardContent className="p-6 space-y-8">
           <NotificationManager />
           
-          {/* Hydration Reminder */}
-          <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <Droplets className="h-6 w-6 text-cyan-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-cyan-800 mb-2">¡Recuerda!</h4>
-                <p className="text-cyan-700">
-                  Hidrátate bien desde que sales del agua: bebe agua o una bebida con electrolitos y sigue hidratándote durante las siguientes horas.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Depth Reference Image */}
-          <div className="flex justify-center">
-            <DepthImage 
-              depth={results?.roundedValues.depth} 
-              className="max-w-md"
-            />
-          </div>
-
-          {/* Time to First Stop Timer */}
-          {!results?.noDecompressionDive && results?.timeToFirstStop > 0 && (
-            <div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-4">Tiempo hasta la Primera Parada</h3>
-              <DiveTimer
-                label="Tiempo hasta la primera parada"
-                initialMinutes={results.timeToFirstStop}
-                onComplete={() => console.log('Time to first stop completed')}
-                className="max-w-md mx-auto"
-                isActive={true}
-              />
-            </div>
-          )}
-
-          {/* Decompression Stops with Timers */}
+          {/* 1. Paradas de Descompresión */}
           <div>
             <h3 className="text-xl font-semibold text-slate-800 mb-4">Paradas de Descompresión</h3>
+            
+            {/* Time to First Stop Timer */}
+            {!results?.noDecompressionDive && results?.timeToFirstStop > 0 && (
+              <div className="mb-6">
+                <DiveTimer
+                  label="Tiempo hasta la primera parada"
+                  initialMinutes={results.timeToFirstStop}
+                  onComplete={() => console.log('Time to first stop completed')}
+                  className="max-w-sm"
+                  isActive={true}
+                />
+              </div>
+            )}
+
             {results?.noDecompressionDive ? (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <p className="text-green-800 font-semibold text-lg">
@@ -360,16 +337,29 @@ const DiveCalculator = () => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {results?.decompressionStops.map((stop, index) => (
-                  <DiveTimer
-                    key={index}
-                    label={`Parada en ${stop.depth} m: ${stop.duration} min`}
-                    initialMinutes={stop.duration}
-                    onComplete={() => console.log(`Stop at ${stop.depth}m completed`)}
-                    className=""
-                    isActive={false}
-                  />
+                  <div key={index} className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-orange-900 mb-2">
+                          {getOrdinalInSpanish(index)}
+                        </h4>
+                        <p className="text-orange-800">
+                          {stop.depth} m durante {stop.duration} minutos
+                        </p>
+                      </div>
+                      <div className="ml-4">
+                        <DiveTimer
+                          label={`Parada en ${stop.depth} m`}
+                          initialMinutes={stop.duration}
+                          onComplete={() => console.log(`Stop at ${stop.depth}m completed`)}
+                          className="w-48"
+                          isActive={false}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 ))}
                 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
@@ -381,32 +371,53 @@ const DiveCalculator = () => {
             )}
           </div>
 
-          {/* Simplified Dive Summary */}
+          {/* 2. Datos Reales / Tabulación Utilizada + Depth Image */}
           <div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-4">Resumen de Inmersión</h3>
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Tabulación utilizada</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-slate-700 mb-2">Datos Reales Ingresados:</h4>
+                    <p className="text-slate-600">Tiempo de Fondo: {results?.actualInputs.bottomTime} minutos</p>
+                    <p className="text-slate-600">Profundidad Máxima: {results?.actualInputs.depth} m</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold text-slate-700 mb-2">Tabulación utilizada:</h4>
+                    <p className="text-slate-600">Profundidad: {results?.roundedValues.depth} m</p>
+                    <p className="text-slate-600">Tiempo: {results?.roundedValues.time} minutos</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold text-slate-700 mb-2">Tabla Utilizada:</h4>
+                    <p className="text-slate-600">US Navy Rev 7 – Tabla de Aire I</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-center items-start">
+                <DepthImage 
+                  depth={results?.roundedValues.depth} 
+                  className="max-w-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Grupo Repetitivo with Tailored Recommendation */}
+          <div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">Grupo Repetitivo</h3>
             <div className="bg-slate-50 border border-slate-200 rounded-lg p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold text-slate-700 mb-3">Datos Reales Ingresados:</h4>
-                  <p className="text-slate-600">Tiempo de Fondo: {results?.actualInputs.bottomTime} minutos</p>
-                  <p className="text-slate-600">Profundidad Máxima: {results?.actualInputs.depth} m</p>
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-800 text-white text-2xl font-bold rounded-full mb-3">
+                  {results?.repetitiveGroup}
                 </div>
-                
-                <div>
-                  <h4 className="font-semibold text-slate-700 mb-3">Tabulación utilizada:</h4>
-                  <p className="text-slate-600">Profundidad: {results?.roundedValues.depth} m</p>
-                  <p className="text-slate-600">Tiempo: {results?.roundedValues.time} minutos</p>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold text-slate-700 mb-3">Tabla Utilizada:</h4>
-                  <p className="text-slate-600">US Navy Rev 7 – Tabla de Aire I</p>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold text-slate-700 mb-3">Grupo Repetitivo:</h4>
-                  <p className="text-slate-600">{results?.repetitiveGroup}</p>
-                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-slate-700 font-medium">
+                  {getRepetitiveGroupRecommendation(results?.repetitiveGroup)}
+                </p>
               </div>
             </div>
           </div>
@@ -451,12 +462,11 @@ const DiveCalculator = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
       <div className="container mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">
-            Calculadora de Descompresión de Buceo
-          </h1>
-          <p className="text-slate-600 text-lg">
-            Tabla de Descompresión de Aire US Navy Rev 7 para Inmersiones Simples
-          </p>
+          <img 
+            src="/bubblelogo.png" 
+            alt="Calculadora de Descompresión de Buceo" 
+            className="mx-auto mb-4 max-h-24 w-auto"
+          />
         </div>
 
         {currentScreen === 1 && renderScreen1()}
