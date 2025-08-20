@@ -357,7 +357,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Decompression Calculation Core Logic"
+    - "Enhanced Timers and Alerts (Screen 3)"
+    - "Depth Images Display"
+    - "Hydration Message Display"
+    - "Simplified Summary Display"
+    - "Long Dive Validation"
+    - "Screen 2 Informational Note"
+    - "Notification Management"
   stuck_tasks:
     - "Enhanced Timers and Alerts (Screen 3)"
     - "Depth Images Display"
@@ -366,7 +372,6 @@ test_plan:
     - "Long Dive Validation"
     - "Screen 2 Informational Note"
     - "Notification Management"
-    - "Decompression Calculation Core Logic"
   test_all: false
   test_priority: "critical_first"
 
