@@ -60,12 +60,16 @@ class USNavyCalculatorService {
     const altitudeEntry = this.tabla3.find(entry => entry['Altitud (m)'] >= altitudeMeters);
     
     if (!altitudeEntry) {
-      return null; // No match found
+      return { group: null, warning: null };
     }
 
-    // For now, tabla_3 only has simple altitude->group mapping
-    // In a more complex implementation, we'd need surface interval columns
-    return altitudeEntry['Grupo Repetitivo'];
+    // Check if tabla_3 has surface interval columns (more sophisticated logic would go here)
+    // For now, tabla_3.json appears to have simple altitude->group mapping
+    // Return the group with a precision warning since we can't use surface interval properly
+    return { 
+      group: altitudeEntry['Grupo Repetitivo'],
+      warning: "No se pudo determinar el grupo repetitivo por altitud con precisión; usando aproximación por altitud."
+    };
   }
 
   /**
