@@ -1,17 +1,18 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
-import { AlertTriangle, Calculator, ArrowLeft, ArrowRight, Loader2, Clock, Gauge, Timer, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Calculator, ArrowLeft, ArrowRight, Loader2, Clock, Gauge, Timer, AlertCircle, Play, Pause, RotateCcw } from 'lucide-react';
 import USNavyCalculatorService from '../services/USNavyCalculatorService';
 
 const USNavyDiveCalculator = () => {
   const [currentScreen, setCurrentScreen] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showSurDO2Popup, setShowSurDO2Popup] = useState(false);
+  const [popupData, setPopupData] = useState(null);
   const [formData, setFormData] = useState({
     mode: '',
     depth: '',
@@ -21,11 +22,13 @@ const USNavyDiveCalculator = () => {
     isRepetitive: false,
     repetitiveGroup: '',
     surfaceInterval: '',
-    surfaceIntervalSurDO2: 3.5
+    moreThan12hAtAltitude: true,
+    altitudeArrivalTime: '',
+    previousBottomTime: '',
+    previousDepth: ''
   });
   const [results, setResults] = useState(null);
   const [errors, setErrors] = useState({});
-  const [timers, setTimers] = useState({});
 
   const modeOptions = [
     { value: 'aire', label: 'Descompresión con aire' },
@@ -52,6 +55,29 @@ const USNavyDiveCalculator = () => {
       newErrors.altitude = 'La altitud no puede ser negativa';
     }
 
+    // Validate altitude <12h fields
+    if (formData.altitude > 0 && !formData.moreThan12hAtAltitude && !formData.altitudeArrivalTime) {
+      newErrors.altitudeArrivalTime = 'Ingrese la hora de llegada a la altitud';
+    }
+
+    // Validate repetitive dive fields
+    if (formData.isRepetitive) {
+      if (!formData.repetitiveGroup) {
+        newErrors.repetitiveGroup = 'Seleccione el grupo repetitivo anterior';
+      }
+      if (!formData.surfaceInterval) {
+        newErrors.surfaceInterval = 'Ingrese el intervalo en superficie';
+      }
+      if (formData.surfaceInterval && parseInt(formData.surfaceInterval) < 10) {
+        if (!formData.previousBottomTime) {
+          newErrors.previousBottomTime = 'Para intervalos <10 min, ingrese el tiempo de fondo anterior';
+        }
+        if (!formData.previousDepth) {
+          newErrors.previousDepth = 'Para intervalos <10 min, ingrese la profundidad anterior';
+        }
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -71,7 +97,10 @@ const USNavyDiveCalculator = () => {
           isRepetitive: formData.isRepetitive,
           repetitiveGroup: formData.repetitiveGroup,
           surfaceInterval: formData.surfaceInterval,
-          surfaceIntervalSurDO2: formData.surfaceIntervalSurDO2
+          isAltitudeLessThan12h: formData.altitude > 0 && !formData.moreThan12hAtAltitude,
+          altitudeArrivalTime: formData.altitudeArrivalTime,
+          previousBottomTime: parseInt(formData.previousBottomTime) || 0,
+          previousDepth: parseFloat(formData.previousDepth) || 0
         };
 
         const result = USNavyCalculatorService.calculateDivePlan(params);
@@ -82,7 +111,8 @@ const USNavyDiveCalculator = () => {
         } else {
           setErrors({ 
             calculation: result.error,
-            alternatives: result.alternatives 
+            alternatives: result.alternatives,
+            isWarning: result.warning 
           });
         }
       } catch (error) {
@@ -111,68 +141,80 @@ const USNavyDiveCalculator = () => {
       isRepetitive: false,
       repetitiveGroup: '',
       surfaceInterval: '',
-      surfaceIntervalSurDO2: 3.5
+      moreThan12hAtAltitude: true,
+      altitudeArrivalTime: '',
+      previousBottomTime: '',
+      previousDepth: ''
     });
     setResults(null);
     setErrors({});
-    setTimers({});
   };
 
-  const TimerComponent = ({ segment, index, onTimerComplete, onTimerWarning, onTimerError }) => {
-    const [timeLeft, setTimeLeft] = useState(segment.time);
+  // Count-up Timer Component
+  const CountUpTimerComponent = ({ segment, index, onWarning, onError, onPopup }) => {
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
-    const [isCompleted, setIsCompleted] = useState(false);
+    const [hasWarned, setHasWarned] = useState(false);
+    const [hasErrored, setHasErrored] = useState(false);
+    const [hasTriggeredPopup, setHasTriggeredPopup] = useState(false);
     const intervalRef = useRef(null);
 
-    const startTimer = () => {
-      if (isCompleted) return;
-      setIsRunning(true);
-      
-      intervalRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            setIsCompleted(true);
-            if (onTimerComplete) onTimerComplete(segment, index);
-            return 0;
-          }
-
-          const newTime = prev - 1;
-          
-          // Check for warnings and errors (for Surface Interval)
-          if (segment.type === 'surface_interval') {
-            if (newTime === segment.warningTime && onTimerWarning) {
-              onTimerWarning(segment, index);
+    useEffect(() => {
+      if (isRunning) {
+        intervalRef.current = setInterval(() => {
+          setElapsedSeconds(prev => {
+            const newElapsed = prev + 1;
+            
+            // Check thresholds based on timer type
+            if (segment.type === 'surface_interval') {
+              // Surface Interval logic
+              if (newElapsed >= 300 && !hasWarned) { // 5:00
+                setHasWarned(true);
+                if (onWarning) onWarning(segment, index, newElapsed);
+              }
+              
+              if (newElapsed > 420 && !hasErrored) { // 7:00
+                setHasErrored(true);
+                if (onError) onError(segment, index, newElapsed);
+              }
+              
+              // Popup trigger between 5-7 minutes (300-420 seconds)
+              if (newElapsed >= 300 && newElapsed <= 420 && !hasTriggeredPopup) {
+                setHasTriggeredPopup(true);
+                if (onPopup) onPopup(segment, index, newElapsed);
+              }
+            } else if (segment.type === 'travel_shift_vent') {
+              // Travel/Shift/Vent logic
+              if (newElapsed > 180 && !hasWarned) { // 3:00
+                setHasWarned(true);
+                if (onWarning) onWarning(segment, index, newElapsed);
+              }
             }
-            if (newTime === segment.errorTime && onTimerError) {
-              onTimerError(segment, index);
-            }
-          }
-
-          // Check for Travel/Shift/Vent warnings
-          if (segment.type === 'travel_shift_vent' && newTime > 180 && onTimerWarning) {
-            onTimerWarning(segment, index);
-          }
-
-          return newTime;
-        });
-      }, 1000);
-    };
-
-    const pauseTimer = () => {
-      setIsRunning(false);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+            
+            return newElapsed;
+          });
+        }, 1000);
+      } else {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
       }
-    };
 
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+      };
+    }, [isRunning, hasWarned, hasErrored, hasTriggeredPopup, segment, index, onWarning, onError, onPopup]);
+
+    const startTimer = () => setIsRunning(true);
+    const pauseTimer = () => setIsRunning(false);
     const resetTimer = () => {
       setIsRunning(false);
-      setIsCompleted(false);
-      setTimeLeft(segment.time);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      setElapsedSeconds(0);
+      setHasWarned(false);
+      setHasErrored(false);
+      setHasTriggeredPopup(false);
     };
 
     const formatTime = (seconds) => {
@@ -181,51 +223,60 @@ const USNavyDiveCalculator = () => {
       return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const getProgressPercentage = () => {
-      return ((segment.time - timeLeft) / segment.time) * 100;
+    const getStatusColor = () => {
+      if (segment.type === 'surface_interval') {
+        if (hasErrored) return 'text-red-600';
+        if (hasWarned) return 'text-yellow-600';
+        return 'text-blue-600';
+      } else if (segment.type === 'travel_shift_vent') {
+        if (hasWarned) return 'text-red-600';
+        return 'text-blue-600';
+      }
+      return 'text-blue-600';
+    };
+
+    const getBackgroundColor = () => {
+      if (segment.type === 'surface_interval') {
+        if (hasErrored) return 'bg-red-50 border-red-200';
+        if (hasWarned) return 'bg-yellow-50 border-yellow-200';
+        return 'bg-cyan-50 border-cyan-200';
+      } else if (segment.type === 'travel_shift_vent') {
+        if (hasWarned) return 'bg-red-50 border-red-200';
+        return 'bg-blue-50 border-blue-200';
+      }
+      return 'bg-blue-50 border-blue-200';
     };
 
     if (!segment.isTimer) return null;
 
     return (
-      <div className="border rounded-lg p-3 bg-yellow-50 border-yellow-200">
+      <div className={`border rounded-lg p-3 mt-2 ${getBackgroundColor()}`}>
         <div className="flex items-center justify-between mb-2">
-          <h4 className="font-medium text-yellow-900 text-sm">
-            Temporizador: {segment.description}
+          <h4 className="font-medium text-sm">
+            ⏱️ {segment.description}
           </h4>
-          {isCompleted && (
-            <Badge variant="secondary" className="bg-green-100 text-green-800">
-              Completado
+          {(hasWarned || hasErrored) && (
+            <Badge variant="secondary" className={hasErrored ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800"}>
+              {hasErrored ? "Error" : "Advertencia"}
             </Badge>
           )}
         </div>
         
         <div className="flex items-center gap-3">
           <div className="flex-1">
-            <div className={`text-xl font-mono font-bold ${
-              isCompleted ? 'text-green-600' : timeLeft < 60 ? 'text-red-600' : 'text-yellow-800'
-            }`}>
-              {formatTime(timeLeft)}
-            </div>
-            
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-              <div 
-                className={`h-2 rounded-full transition-all duration-1000 ${
-                  isCompleted ? 'bg-green-500' : timeLeft < 60 ? 'bg-red-500' : 'bg-yellow-500'
-                }`}
-                style={{ width: `${getProgressPercentage()}%` }}
-              />
+            <div className={`text-xl font-mono font-bold ${getStatusColor()}`}>
+              {formatTime(elapsedSeconds)}
             </div>
           </div>
 
           <div className="flex gap-1">
             <Button
               onClick={startTimer}
-              disabled={isRunning || isCompleted}
+              disabled={isRunning}
               size="sm"
               className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 text-xs"
             >
-              ▶
+              <Play className="w-3 h-3" />
             </Button>
             
             <Button
@@ -235,7 +286,7 @@ const USNavyDiveCalculator = () => {
               variant="outline"
               className="px-2 py-1 text-xs"
             >
-              ⏸
+              <Pause className="w-3 h-3" />
             </Button>
             
             <Button
@@ -244,33 +295,70 @@ const USNavyDiveCalculator = () => {
               variant="outline"
               className="px-2 py-1 text-xs"
             >
-              🔄
+              <RotateCcw className="w-3 h-3" />
             </Button>
           </div>
         </div>
 
-        {/* Warning for Travel/Shift/Vent */}
-        {segment.type === 'travel_shift_vent' && timeLeft > 180 && (
+        {/* Warning/Error Messages */}
+        {segment.type === 'travel_shift_vent' && hasWarned && (
           <div className="mt-2 text-red-600 text-sm font-medium">
-            ⚠️ Excede el máximo de 3 min de Travel/Shift/Vent
+            ⚠️ Excede el máximo de 3 min de Travel/Shift/Vent.
+          </div>
+        )}
+        
+        {segment.type === 'surface_interval' && hasErrored && (
+          <div className="mt-2 text-red-600 text-sm font-medium">
+            🚨 Ventana de transferencia excede 7 min: seguir protocolo TT5/TT6.
           </div>
         )}
       </div>
     );
   };
 
-  const handleTimerWarning = (segment, index) => {
+  const handleTimerWarning = (segment, index, elapsedSeconds) => {
+    console.log(`Timer warning: ${segment.type} at ${elapsedSeconds} seconds`);
+  };
+
+  const handleTimerError = (segment, index, elapsedSeconds) => {
+    console.log(`Timer error: ${segment.type} at ${elapsedSeconds} seconds`);
+  };
+
+  const handleTimerPopup = (segment, index, elapsedSeconds) => {
     if (segment.type === 'surface_interval') {
-      // Show popup for SurDO₂ delay between 5-7 minutes
+      setPopupData({ segment, index, elapsedSeconds });
       setShowSurDO2Popup(true);
     }
   };
 
-  const handleTimerError = (segment, index) => {
-    if (segment.type === 'surface_interval') {
-      // Show error for >7 minutes
-      alert('Ventana de transferencia excede 7 min: seguir protocolo TT5/TT6');
+  const handlePopupResponse = (addHalfPeriod) => {
+    setShowSurDO2Popup(false);
+    
+    if (addHalfPeriod && results) {
+      // Add half-period (15 min O₂) at 15m to the timeline
+      const newTimeline = [...results.timeline];
+      
+      // Find where to insert the half-period (after compression, before first O₂ period)
+      const compressionIndex = newTimeline.findIndex(item => item.type === 'compression');
+      if (compressionIndex !== -1) {
+        newTimeline.splice(compressionIndex + 1, 0, {
+          type: 'o2_period',
+          depth: 15,
+          time: 15 * 60, // 15 minutes in seconds
+          gas: 'O₂',
+          description: 'Medio período adicional de O₂ - 15 min en 15m (retraso en transferencia)'
+        });
+        
+        // Update results with modified timeline
+        setResults({
+          ...results,
+          timeline: newTimeline,
+          totalTime: results.totalTime + (15 * 60)
+        });
+      }
     }
+    
+    setPopupData(null);
   };
 
   const renderScreen1 = () => (
@@ -375,26 +463,40 @@ const USNavyDiveCalculator = () => {
           </div>
         )}
 
-        {/* SurDO₂ Surface Interval */}
-        {formData.mode === 'surdo2' && (
+        {/* Altitude <12h */}
+        {formData.altitude > 0 && (
           <div>
-            <Label htmlFor="surfaceIntervalSurDO2" className="text-base font-medium text-slate-700">
-              Intervalo en Superficie SurDO₂ (minutos)
+            <Label className="text-base font-medium text-slate-700">
+              ¿Lleva el buzo más de 12h a esa altitud?
             </Label>
-            <Input
-              id="surfaceIntervalSurDO2"
-              type="number"
-              min="1"
-              max="7"
-              step="0.1"
-              placeholder="3.5"
-              value={formData.surfaceIntervalSurDO2}
-              onChange={(e) => setFormData({...formData, surfaceIntervalSurDO2: parseFloat(e.target.value) || 3.5})}
-              className="mt-2"
-            />
-            <p className="text-sm text-slate-600 mt-1">
-              Tiempo desde salir de 12m hasta llegar a 15m en cámara (normal: ~3.5 min, máx: 5 min)
-            </p>
+            <Select 
+              value={formData.moreThan12hAtAltitude ? 'si' : 'no'} 
+              onValueChange={(value) => setFormData({...formData, moreThan12hAtAltitude: value === 'si'})}
+            >
+              <SelectTrigger className="mt-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="si">Sí</SelectItem>
+                <SelectItem value="no">No</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {!formData.moreThan12hAtAltitude && (
+              <div className="mt-3">
+                <Label htmlFor="altitudeArrivalTime" className="text-sm font-medium text-slate-700">
+                  Hora de llegada a la altitud *
+                </Label>
+                <Input
+                  id="altitudeArrivalTime"
+                  type="datetime-local"
+                  value={formData.altitudeArrivalTime}
+                  onChange={(e) => setFormData({...formData, altitudeArrivalTime: e.target.value})}
+                  className={`mt-1 ${errors.altitudeArrivalTime ? 'border-red-500' : ''}`}
+                />
+                {errors.altitudeArrivalTime && <p className="text-red-500 text-sm mt-1">{errors.altitudeArrivalTime}</p>}
+              </div>
+            )}
           </div>
         )}
 
@@ -418,12 +520,12 @@ const USNavyDiveCalculator = () => {
           {formData.isRepetitive && (
             <div className="space-y-3">
               <div>
-                <Label className="text-sm font-medium">Grupo Repetitivo Anterior</Label>
+                <Label className="text-sm font-medium">Grupo Repetitivo Anterior *</Label>
                 <Select 
                   value={formData.repetitiveGroup} 
                   onValueChange={(value) => setFormData({...formData, repetitiveGroup: value})}
                 >
-                  <SelectTrigger className="mt-1">
+                  <SelectTrigger className={`mt-1 ${errors.repetitiveGroup ? 'border-red-500' : ''}`}>
                     <SelectValue placeholder="Seleccione grupo (A-Z)" />
                   </SelectTrigger>
                   <SelectContent>
@@ -432,19 +534,59 @@ const USNavyDiveCalculator = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.repetitiveGroup && <p className="text-red-500 text-sm mt-1">{errors.repetitiveGroup}</p>}
               </div>
 
               <div>
-                <Label className="text-sm font-medium">Intervalo en Superficie (minutos)</Label>
+                <Label className="text-sm font-medium">Intervalo en Superficie (minutos) *</Label>
                 <Input
                   type="number"
-                  min="10"
+                  min="0"
                   placeholder="Ej: 120"
                   value={formData.surfaceInterval}
                   onChange={(e) => setFormData({...formData, surfaceInterval: e.target.value})}
-                  className="mt-1"
+                  className={`mt-1 ${errors.surfaceInterval ? 'border-red-500' : ''}`}
                 />
+                {errors.surfaceInterval && <p className="text-red-500 text-sm mt-1">{errors.surfaceInterval}</p>}
               </div>
+
+              {/* Fields for <10 min rule */}
+              {formData.surfaceInterval && parseInt(formData.surfaceInterval) < 10 && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                  <p className="text-yellow-800 text-sm mb-3">
+                    ⚠️ Intervalo &lt;10 min: Se tratará como buceo único combinado
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm font-medium">Tiempo de Fondo Anterior (min) *</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="ej: 30"
+                        value={formData.previousBottomTime}
+                        onChange={(e) => setFormData({...formData, previousBottomTime: e.target.value})}
+                        className={`mt-1 ${errors.previousBottomTime ? 'border-red-500' : ''}`}
+                      />
+                      {errors.previousBottomTime && <p className="text-red-500 text-sm mt-1">{errors.previousBottomTime}</p>}
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium">Profundidad Anterior (m) *</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        step="0.1"
+                        placeholder="ej: 20"
+                        value={formData.previousDepth}
+                        onChange={(e) => setFormData({...formData, previousDepth: e.target.value})}
+                        className={`mt-1 ${errors.previousDepth ? 'border-red-500' : ''}`}
+                      />
+                      {errors.previousDepth && <p className="text-red-500 text-sm mt-1">{errors.previousDepth}</p>}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -470,11 +612,11 @@ const USNavyDiveCalculator = () => {
         </div>
         
         {errors.calculation && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
+          <div className={`${errors.isWarning ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200'} border rounded-lg p-4 mt-4`}>
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className={`h-5 w-5 ${errors.isWarning ? 'text-yellow-600' : 'text-red-600'} flex-shrink-0 mt-0.5`} />
               <div>
-                <p className="text-red-700 text-sm font-medium">{errors.calculation}</p>
+                <p className={`${errors.isWarning ? 'text-yellow-700' : 'text-red-700'} text-sm font-medium`}>{errors.calculation}</p>
                 {errors.alternatives && errors.alternatives.length > 0 && (
                   <div className="mt-2">
                     <p className="text-sm text-red-600">Modos alternativos disponibles:</p>
@@ -509,6 +651,7 @@ const USNavyDiveCalculator = () => {
               segment.type === 'air_break' ? 'bg-yellow-50 border-yellow-200' :
               segment.type === 'compression' ? 'bg-purple-50 border-purple-200' :
               segment.type === 'surface_interval' ? 'bg-cyan-50 border-cyan-200' :
+              segment.type === 'travel_shift_vent' ? 'bg-blue-50 border-blue-200' :
               'bg-gray-50 border-gray-200'
             }`}>
               <div className="flex items-center justify-between">
@@ -520,6 +663,7 @@ const USNavyDiveCalculator = () => {
                     {segment.type === 'air_break' && <Clock className="h-4 w-4 text-yellow-600" />}
                     {segment.type === 'compression' && <ArrowRight className="h-4 w-4 text-purple-600 rotate-90" />}
                     {segment.type === 'surface_interval' && <AlertCircle className="h-4 w-4 text-cyan-600" />}
+                    {segment.type === 'travel_shift_vent' && <Timer className="h-4 w-4 text-blue-600" />}
                     <span className="font-medium text-slate-800">
                       {segment.description}
                     </span>
@@ -534,7 +678,10 @@ const USNavyDiveCalculator = () => {
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      {USNavyCalculatorService.formatTime(segment.time)}
+                      {segment.isTimer && segment.timerType === 'countUp' 
+                        ? 'Temporizador' 
+                        : USNavyCalculatorService.formatTime(segment.time)
+                      }
                     </div>
                     <Badge variant={segment.gas === 'O₂' ? 'default' : 'secondary'}>
                       {segment.gas}
@@ -549,12 +696,13 @@ const USNavyDiveCalculator = () => {
               </div>
             </div>
 
-            {/* Timer Component for segments that need timing */}
-            <TimerComponent 
+            {/* Count-up Timer Component */}
+            <CountUpTimerComponent 
               segment={segment}
               index={index}
-              onTimerWarning={handleTimerWarning}
-              onTimerError={handleTimerError}
+              onWarning={handleTimerWarning}
+              onError={handleTimerError}
+              onPopup={handleTimerPopup}
             />
           </div>
         ))}
@@ -590,9 +738,19 @@ const USNavyDiveCalculator = () => {
               <div>
                 <span className="font-medium">Tiempo de Fondo:</span> {formData.bottomTime} min
               </div>
+              {results?.effectiveBottomTime !== parseInt(formData.bottomTime) && (
+                <div>
+                  <span className="font-medium">Tiempo Efectivo:</span> {results?.effectiveBottomTime} min
+                </div>
+              )}
               {formData.altitude > 0 && (
                 <div>
                   <span className="font-medium">Altitud:</span> {formData.altitude}m
+                </div>
+              )}
+              {results?.altitudeRepetitiveGroup && (
+                <div>
+                  <span className="font-medium">Grupo por Altitud:</span> {results.altitudeRepetitiveGroup}
                 </div>
               )}
             </div>
@@ -663,6 +821,7 @@ const USNavyDiveCalculator = () => {
                 <li>• Para O₂: máximo 3 min para Travel/Shift/Vent</li>
                 <li>• SurDO₂: ventana de transferencia ≤5 min (máx 7 min con modificación)</li>
                 <li>• Nunca omita o acorte las paradas de descompresión</li>
+                <li>• Para buceos repetitivos: respete los intervalos mínimos en superficie</li>
               </ul>
             </div>
           </div>
@@ -689,7 +848,7 @@ const USNavyDiveCalculator = () => {
 
   // SurDO₂ Popup for transfer delays
   const renderSurDO2Popup = () => {
-    if (!showSurDO2Popup) return null;
+    if (!showSurDO2Popup || !popupData) return null;
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -698,20 +857,17 @@ const USNavyDiveCalculator = () => {
             Retraso en Transferencia SurDO₂
           </h3>
           <p className="text-orange-700 mb-6">
-            Se ha producido un retraso en el tiempo de llegada a 15 m en cámara; según el manual debe sumarse medio periodo a 15 m.
+            Se ha producido un retraso en el tiempo de llegada a 15 m en cámara; según el manual debe sumarse medio periodo a 15 m (Pulse 'Sí' si desea sumarlo o 'No' si desea dejarlo como está).
           </p>
           <div className="flex gap-3">
             <Button 
-              onClick={() => {
-                setShowSurDO2Popup(false);
-                // TODO: Add half period to calculation
-              }}
+              onClick={() => handlePopupResponse(true)}
               className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
             >
               Sí - Sumar medio período
             </Button>
             <Button 
-              onClick={() => setShowSurDO2Popup(false)}
+              onClick={() => handlePopupResponse(false)}
               variant="outline"
               className="flex-1"
             >
@@ -736,7 +892,7 @@ const USNavyDiveCalculator = () => {
             Calculadora US Navy Rev.7 Chapter 9
           </h1>
           <p className="text-slate-600">
-            Sistema Completo de Descompresión: Aire, O₂ en Agua, SurDO₂, Altitud y Repetitivos
+            Sistema Completo: Aire, O₂ en Agua, SurDO₂, Altitud, Repetitivos y Temporizadores
           </p>
         </div>
 

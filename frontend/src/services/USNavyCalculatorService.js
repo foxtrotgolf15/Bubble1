@@ -53,6 +53,86 @@ class USNavyCalculatorService {
   }
 
   /**
+   * Get repetitive group from tabla_3 for altitude <12h
+   */
+  getAltitudeRepetitiveGroup(altitudeMeters, surfaceIntervalMinutes) {
+    // Find first altitude entry >= input altitude
+    const altitudeEntry = this.tabla3.find(entry => entry['Altitud (m)'] >= altitudeMeters);
+    
+    if (!altitudeEntry) {
+      return null; // No match found
+    }
+
+    // For now, tabla_3 only has simple altitude->group mapping
+    // In a more complex implementation, we'd need surface interval columns
+    return altitudeEntry['Grupo Repetitivo'];
+  }
+
+  /**
+   * Parse surface interval range (e.g., "0:10TO2:20") and check if given interval falls within
+   */
+  parseAndCheckSurfaceInterval(rangeString, intervalMinutes) {
+    if (!rangeString || rangeString === '**') return false;
+    
+    // Parse format like "0:10TO2:20" or "2:21TO3:00"
+    const match = rangeString.match(/(\d+):(\d+)TO(\d+):(\d+)/);
+    if (!match) return false;
+    
+    const startHours = parseInt(match[1]);
+    const startMinutes = parseInt(match[2]);
+    const endHours = parseInt(match[3]);
+    const endMinutes = parseInt(match[4]);
+    
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const endTotalMinutes = endHours * 60 + endMinutes;
+    
+    return intervalMinutes >= startTotalMinutes && intervalMinutes <= endTotalMinutes;
+  }
+
+  /**
+   * Get new repetitive group from tabla_2_1 based on previous group and surface interval
+   */
+  getNewRepetitiveGroup(previousGroup, surfaceIntervalMinutes) {
+    // Find all entries for the previous group
+    const entries = this.tabla2_1.filter(entry => 
+      entry['Grupo de buceo sucesivo al principio del intervalo'] === previousGroup
+    );
+
+    // Find which interval range the surface interval falls into
+    for (const entry of entries) {
+      if (this.parseAndCheckSurfaceInterval(entry['Intervalo en superficie'], surfaceIntervalMinutes)) {
+        return entry['Grupo de buceo sucesivo al final del intervalo en superficie'];
+      }
+    }
+
+    return previousGroup; // If no match, keep the same group
+  }
+
+  /**
+   * Get RNT from tabla_2_2 based on repetitive group and depth
+   */
+  getRNT(repetitiveGroup, depth) {
+    // Find entry for the depth (use exact or next greater depth)
+    const depthEntries = this.tabla2_2.filter(entry => 
+      entry['Profundidad del buceo sucesivo'] >= depth
+    );
+
+    if (depthEntries.length === 0) return null;
+
+    // Sort by depth and get the smallest applicable depth
+    depthEntries.sort((a, b) => a['Profundidad del buceo sucesivo'] - b['Profundidad del buceo sucesivo']);
+    const entry = depthEntries[0];
+
+    const rntValue = entry[repetitiveGroup];
+    
+    if (rntValue === '**') {
+      return '**'; // Not permitted
+    }
+
+    return parseInt(rntValue) || 0;
+  }
+
+  /**
    * Find matching entry in tabla_1 based on mode, depth, and time
    * Rules: mode flag = "Si", depth = exact or next deeper, bottom time = exact or next longer
    */
@@ -293,14 +373,16 @@ class USNavyCalculatorService {
       const gas = (stop.depth <= 9) ? 'O₂' : 'Aire';
 
       if (gas === 'O₂') {
-        // Add Travel/Shift/Vent period before O₂
+        // Add Travel/Shift/Vent period before O₂ (COUNT-UP TIMER)
         timeline.push({
           type: 'travel_shift_vent',
           depth: stop.depth,
-          time: 180, // 3 minutes maximum
+          time: 0, // Count-up timer starts at 0
           gas: 'Aire',
-          description: `Travel/Shift/Vent - Cambio a O₂ (máx 3 min)`,
-          isTimer: true
+          description: `Travel/Shift/Vent - Cambio a O₂`,
+          isTimer: true,
+          timerType: 'countUp',
+          warningThreshold: 180 // 3 minutes
         });
 
         // Calculate O₂ segments with breaks
@@ -363,7 +445,7 @@ class USNavyCalculatorService {
   /**
    * Generate timeline for Surface Decompression on O₂ (SurDO₂)
    */
-  generateSurDO2Timeline(entry, realDepth, surfaceInterval = 3.5) {
+  generateSurDO2Timeline(entry, realDepth) {
     const timeline = [];
     let totalTime = 0;
     
@@ -403,50 +485,62 @@ class USNavyCalculatorService {
       currentDepth = stop.depth;
     });
 
-    // Ascent from 12m to surface
-    let ascentSpeed = 40; // 40 fsw/min = ~12.2 m/min (using 12 m/min)
-    if (currentDepth > 12) {
-      // First ascent to 12m at 9 m/min
-      const ascentTo12Time = ((currentDepth - 12) / 9) * 60;
-      timeline.push({
-        type: 'ascent',
-        fromDepth: currentDepth,
-        toDepth: 12,
-        time: ascentTo12Time,
-        speed: 9,
-        gas: 'Aire',
-        description: `Ascenso de ${currentDepth}m a 12m (9 m/min)`
-      });
-      totalTime += ascentTo12Time;
-      currentDepth = 12;
+    // Determine ascent speed from current depth to surface
+    let ascentSpeed = 9; // Default 9 m/min
+    
+    // Check if we have a 12m (40fsw) stop
+    const has12mStop = stops.some(stop => stop.depth === 12);
+    
+    if (has12mStop) {
+      // If 40 fsw stop required: ascend 40 fsw → surface at 40 fsw/min (≈12 m/min)
+      ascentSpeed = 12;
+    } else {
+      // If no 40 fsw stop: ascend bottom → 40 fsw at 30 fsw/min (≈9 m/min), then 40 fsw → surface at 40 fsw/min
+      if (currentDepth > 12) {
+        // First ascent to 12m at 9 m/min
+        const ascentTo12Time = ((currentDepth - 12) / 9) * 60;
+        timeline.push({
+          type: 'ascent',
+          fromDepth: currentDepth,
+          toDepth: 12,
+          time: ascentTo12Time,
+          speed: 9,
+          gas: 'Aire',
+          description: `Ascenso de ${currentDepth}m a 12m (9 m/min)`
+        });
+        totalTime += ascentTo12Time;
+        currentDepth = 12;
+      }
+      ascentSpeed = 12; // Then 12m to surface at 12 m/min
     }
 
-    // Ascent from 12m to surface at 12 m/min
-    const surfaceAscentTime = (currentDepth / 12) * 60;
+    // Ascent to surface
+    const surfaceAscentTime = (currentDepth / ascentSpeed) * 60;
     timeline.push({
       type: 'ascent',
       fromDepth: currentDepth,
       toDepth: 0,
       time: surfaceAscentTime,
-      speed: 12,
+      speed: ascentSpeed,
       gas: 'Aire',
-      description: `Ascenso de 12m a superficie (12 m/min)`
+      description: `Ascenso de ${currentDepth}m a superficie (${ascentSpeed} m/min)`
     });
     totalTime += surfaceAscentTime;
 
-    // Surface Interval (must be ≤5 min, normal ~3.5 min)
-    const surfaceIntervalSeconds = surfaceInterval * 60;
+    // Surface Interval (COUNT-UP TIMER with 5/7 min logic)
     timeline.push({
       type: 'surface_interval',
       depth: 0,
-      time: surfaceIntervalSeconds,
+      time: 0, // Count-up timer starts at 0
       gas: 'Aire',
-      description: `Intervalo en superficie - ${surfaceInterval} min`,
+      description: `Intervalo en superficie - Contando tiempo`,
       isTimer: true,
-      warningTime: 5 * 60, // 5 minutes
-      errorTime: 7 * 60   // 7 minutes
+      timerType: 'countUp',
+      warningThreshold: 300, // 5 minutes
+      errorThreshold: 420,   // 7 minutes
+      popupThresholdMin: 300,
+      popupThresholdMax: 420
     });
-    totalTime += surfaceIntervalSeconds;
 
     // Phase 2: Chamber compression to 15m (50 fsw) on air
     const compressionTime = (15 / 30) * 60; // 30 m/min descent rate
@@ -596,15 +690,6 @@ class USNavyCalculatorService {
   }
 
   /**
-   * Get repetitive group for altitude (if diver <12h at altitude)
-   */
-  getAltitudeRepetitiveGroup(altitudeMeters) {
-    // Find matching altitude entry in tabla_3.json
-    const altitudeEntry = this.tabla3.find(entry => entry['Altitud (m)'] >= altitudeMeters);
-    return altitudeEntry ? altitudeEntry['Grupo Repetitivo'] : 'A';
-  }
-
-  /**
    * Format time in mm:ss format
    */
   formatTime(seconds) {
@@ -626,7 +711,10 @@ class USNavyCalculatorService {
       isRepetitive = false,
       repetitiveGroup = '',
       surfaceInterval = '',
-      surfaceIntervalSurDO2 = 3.5
+      isAltitudeLessThan12h = false,
+      altitudeArrivalTime = null,
+      previousBottomTime = 0,
+      previousDepth = 0
     } = params;
 
     try {
@@ -637,15 +725,73 @@ class USNavyCalculatorService {
         recalibrated
       );
 
-      // Step 2: Handle repetitive dives if applicable
-      let adjustedBottomTime = bottomTime;
-      if (isRepetitive && repetitiveGroup && surfaceInterval) {
-        // TODO: Implement repetitive dive calculations using tabla_2_1 and tabla_2_2
-        // For now, use the original bottom time
+      let effectiveBottomTime = bottomTime;
+      let effectiveDepth = equivalentDepth;
+      let finalRepetitiveGroup = '';
+      let altitudeRepetitiveGroup = null;
+
+      // Step 2: Handle altitude <12h logic
+      if (altitude > 0 && isAltitudeLessThan12h && altitudeArrivalTime) {
+        const now = new Date();
+        const arrival = new Date(altitudeArrivalTime);
+        const surfaceIntervalAtAltitude = Math.floor((now - arrival) / (1000 * 60)); // minutes
+
+        altitudeRepetitiveGroup = this.getAltitudeRepetitiveGroup(altitude, surfaceIntervalAtAltitude);
+        
+        if (!altitudeRepetitiveGroup) {
+          return {
+            success: false,
+            error: 'No se pudo determinar el grupo repetitivo por altitud; continúe con precaución.',
+            warning: true
+          };
+        }
+
+        // Treat altitude group as repetitive group for further processing
+        if (!isRepetitive) {
+          isRepetitive = true;
+          repetitiveGroup = altitudeRepetitiveGroup;
+          surfaceInterval = surfaceIntervalAtAltitude;
+        }
       }
 
-      // Step 3: Find matching entry in tabla_1
-      const tableResult = this.findTable1Entry(mode, equivalentDepth, adjustedBottomTime);
+      // Step 3: Handle repetitive dives
+      if (isRepetitive && repetitiveGroup && surfaceInterval !== '') {
+        const surfaceIntervalNum = parseInt(surfaceInterval);
+        
+        if (surfaceIntervalNum < 10) {
+          // <10 min rule: treat as single dive
+          effectiveBottomTime = previousBottomTime + bottomTime;
+          effectiveDepth = Math.max(previousDepth, equivalentDepth);
+        } else {
+          // Normal repetitive dive workflow
+          
+          // Step 3a: Get new repetitive group from tabla_2_1
+          const newGroup = this.getNewRepetitiveGroup(repetitiveGroup, surfaceIntervalNum);
+          
+          // Step 3b: Get RNT from tabla_2_2
+          const rnt = this.getRNT(newGroup, equivalentDepth);
+          
+          if (rnt === '**') {
+            return {
+              success: false,
+              error: 'No está permitido realizar buceos sucesivos con este buzo (siguiendo las reglas del US Navy Rev 7).'
+            };
+          }
+          
+          if (rnt === null) {
+            return {
+              success: false,
+              error: 'No se pudo determinar el tiempo de nitrógeno residual para esta profundidad.'
+            };
+          }
+          
+          // Step 3c: Adjust bottom time
+          effectiveBottomTime = bottomTime + rnt;
+        }
+      }
+
+      // Step 4: Find matching entry in tabla_1
+      const tableResult = this.findTable1Entry(mode, effectiveDepth, effectiveBottomTime);
       
       if (!tableResult.success) {
         return {
@@ -656,8 +802,9 @@ class USNavyCalculatorService {
       }
 
       const entry = tableResult.entry;
+      finalRepetitiveGroup = entry['Grupo Repetición'];
 
-      // Step 4: Check if it's a no-decompression dive
+      // Step 5: Check if it's a no-decompression dive
       if (this.isNoDecompressionDive(entry)) {
         const ascentTime = (realDepth / 9) * 60; // 9 m/min
         return {
@@ -676,11 +823,15 @@ class USNavyCalculatorService {
             description: 'Ascenso directo a superficie a 9 m/min'
           }],
           totalTime: ascentTime,
-          repetitiveGroup: entry['Grupo Repetición']
+          repetitiveGroup: finalRepetitiveGroup,
+          tableDepth: entry['Profundidad (m)'],
+          tableTime: entry['Tiempo de Fondo (min)'],
+          effectiveBottomTime,
+          altitudeRepetitiveGroup
         };
       }
 
-      // Step 5: Generate timeline based on mode
+      // Step 6: Generate timeline based on mode
       let result;
       switch (mode) {
         case 'aire':
@@ -690,7 +841,7 @@ class USNavyCalculatorService {
           result = this.generateO2WaterDecompressionTimeline(entry, realDepth);
           break;
         case 'surdo2':
-          result = this.generateSurDO2Timeline(entry, realDepth, surfaceIntervalSurDO2);
+          result = this.generateSurDO2Timeline(entry, realDepth);
           break;
         default:
           throw new Error('Modo no válido');
@@ -704,9 +855,11 @@ class USNavyCalculatorService {
         entry,
         timeline: result.timeline,
         totalTime: result.totalTime,
-        repetitiveGroup: entry['Grupo Repetición'],
+        repetitiveGroup: finalRepetitiveGroup,
         tableDepth: entry['Profundidad (m)'],
-        tableTime: entry['Tiempo de Fondo (min)']
+        tableTime: entry['Tiempo de Fondo (min)'],
+        effectiveBottomTime,
+        altitudeRepetitiveGroup
       };
 
     } catch (error) {
