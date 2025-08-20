@@ -300,6 +300,9 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "PARTIALLY VERIFIED - Bug D basic functionality working correctly. Repetitive group assignment verified (15m/100min gives Group N, appropriate for dive profile). Spanish error messages maintained for excessive exposure. However, full surface interval logic with tabla_2_2 RNT lookup, <10min rule (effective bottom time = previous + current), ≥10min rule (RNT + adjusted bottom time), and ** case Spanish error handling requires additional API endpoints for complete repetitive dive scenarios."
+        -working: true
+        -agent: "testing"
+        -comment: "FRONTEND INTEGRATION VERIFIED - Bug D fix working in frontend. Repetitive dive section functional with checkbox to enable, repetitive group dropdown (A-Z), surface interval input. <10 min rule working: when surface interval <10 min, shows warning message and requires previous bottom time/depth inputs. Effective bottom time calculation working (previous + current). ≥10 min logic functional with RNT calculations. Spanish error message 'No está permitido realizar buceos sucesivos con este buzo (siguiendo las reglas del US Navy Rev 7)' displays correctly for prohibited combinations."
 
 metadata:
   created_by: "testing_agent"
