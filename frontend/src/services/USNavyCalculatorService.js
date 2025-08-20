@@ -452,7 +452,6 @@ class USNavyCalculatorService {
    */
   generateSurDO2Timeline(entry, realDepth) {
     const timeline = [];
-    let totalTime = 0;
     
     const stops = this.extractStops(entry);
     let currentDepth = realDepth;
@@ -474,7 +473,6 @@ class USNavyCalculatorService {
           gas: 'Aire',
           description: `Ascenso de ${currentDepth}m a ${stop.depth}m (9 m/min)`
         });
-        totalTime += ascentTime;
       }
 
       // Decompression stop
@@ -486,7 +484,6 @@ class USNavyCalculatorService {
         gas: 'Aire',
         description: `Parada de descompresión en ${stop.depth}m`
       });
-      totalTime += stopTimeSeconds;
       currentDepth = stop.depth;
     });
 
@@ -513,7 +510,6 @@ class USNavyCalculatorService {
           gas: 'Aire',
           description: `Ascenso de ${currentDepth}m a 12m (9 m/min)`
         });
-        totalTime += ascentTo12Time;
         currentDepth = 12;
       }
       ascentSpeed = 12; // Then 12m to surface at 12 m/min
@@ -530,7 +526,6 @@ class USNavyCalculatorService {
       gas: 'Aire',
       description: `Ascenso de ${currentDepth}m a superficie (${ascentSpeed} m/min)`
     });
-    totalTime += surfaceAscentTime;
 
     // Surface Interval (COUNT-UP TIMER with 5/7 min logic)
     timeline.push({
@@ -558,7 +553,6 @@ class USNavyCalculatorService {
       gas: 'Aire',
       description: `Compresión en cámara a 15m (30 m/min)`
     });
-    totalTime += compressionTime;
 
     // Phase 3: O₂ periods in chamber
     const chamberPeriods = this.parseChamberPeriods(entry['Periodos en camara']);
@@ -692,7 +686,11 @@ class USNavyCalculatorService {
       gas: 'Aire',
       description: `Ascenso final a superficie en cámara (30 m/min)`
     });
-    totalTime += finalAscentTime;
+
+    // Calculate total time by summing ALL fixed-duration segments (excluding count-up timers)
+    const totalTime = timeline
+      .filter(segment => !segment.isTimer) // Exclude count-up timers
+      .reduce((sum, segment) => sum + segment.time, 0);
 
     return { timeline, totalTime };
   }
