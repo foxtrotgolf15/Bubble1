@@ -1,0 +1,682 @@
+[
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"A",
+        "Intervalo en superficie":"0:10TO2:20",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"B",
+        "Intervalo en superficie":"0:10TO1:16",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"B",
+        "Intervalo en superficie":"1:17TO3:36",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"C",
+        "Intervalo en superficie":"0:10TO0:55",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"C",
+        "Intervalo en superficie":"0:56TO2:11",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"C",
+        "Intervalo en superficie":"2:12TO4:31",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"D",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"D",
+        "Intervalo en superficie":"0:53TO1:47",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"D",
+        "Intervalo en superficie":"1:48TO3:03",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"D",
+        "Intervalo en superficie":"3:04TO5:23",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"E",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"E",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"E",
+        "Intervalo en superficie":"1:45TO2:39",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"E",
+        "Intervalo en superficie":"2:40TO3:55",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"E",
+        "Intervalo en superficie":"3:56TO6:15",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"F",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"F",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"F",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"F",
+        "Intervalo en superficie":"2:38TO3:31",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"F",
+        "Intervalo en superficie":"3:32TO4:48",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"F",
+        "Intervalo en superficie":"4:49TO7:08",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"G",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"G"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"G",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"G",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"G",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"G",
+        "Intervalo en superficie":"3:30TO4:23",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"G",
+        "Intervalo en superficie":"4:24TO5:40",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"G",
+        "Intervalo en superficie":"5:41TO8:00",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"H",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"H"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"H",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"G"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"H",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"H",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"H",
+        "Intervalo en superficie":"3:30TO4:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"H",
+        "Intervalo en superficie":"4:22TO5:16",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"H",
+        "Intervalo en superficie":"5:17TO6:32",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"H",
+        "Intervalo en superficie":"6:33TO8:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"I",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"I"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"I",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"H"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"I",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"G"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"I",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"I",
+        "Intervalo en superficie":"3:30TO4:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"I",
+        "Intervalo en superficie":"4:22TO5:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"I",
+        "Intervalo en superficie":"5:14TO6:08",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"I",
+        "Intervalo en superficie":"6:09TO7:24",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"I",
+        "Intervalo en superficie":"7:25TO9:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"J"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"I"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"H"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"G"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"3:30TO4:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"4:22TO5:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"5:14TO6:06",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"6:07TO7:00",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"7:01TO8:16",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"J",
+        "Intervalo en superficie":"8:17TO10:36",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"K"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"J"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"I"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"H"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"3:30TO4:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"G"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"4:22TO5:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"5:14TO6:06",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"6:07TO6:58",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"6:59TO7:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"7:53TO9:09",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"K",
+        "Intervalo en superficie":"9:10TO11:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"L"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"K"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"J"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"I"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"3:30TO4:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"H"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"4:22TO5:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"G"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"5:14TO6:06",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"6:07TO6:58",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"6:59TO7:50",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"7:51TO8:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"8:45TO10:01",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"L",
+        "Intervalo en superficie":"10:02TO12:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"M"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"L"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"K"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"J"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"3:30TO4:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"I"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"4:22TO5:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"H"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"5:14TO6:06",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"G"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"6:07TO6:58",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"6:59TO7:50",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"7:51TO8:42",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"8:43TO9:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"9:38TO10:53",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"M",
+        "Intervalo en superficie":"10:54TO13:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"N"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"M"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"L"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"K"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"3:30TO4:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"J"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"4:22TO5:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"I"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"5:14TO6:06",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"H"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"6:07TO6:58",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"G"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"6:59TO7:50",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"7:51TO8:42",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"8:43TO9:34",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"9:35TO10:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"10:30TO11:45",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"N",
+        "Intervalo en superficie":"11:46TO14:05",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"O"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"N"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"M"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"L"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"3:30TO4:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"K"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"4:22TO5:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"J"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"5:14TO6:06",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"I"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"6:07TO6:58",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"H"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"6:59TO7:50",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"G"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"7:51TO8:42",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"F"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"8:43TO9:34",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"E"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"9:35TO10:27",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"D"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"10:28TO11:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"C"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"11:22TO12:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"B"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"O",
+        "Intervalo en superficie":"12:38TO14:58",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"A"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"0:10TO0:52",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"Z"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"0:53TO1:44",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"Y"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"1:45TO2:37",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"X"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"2:38TO3:29",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"W"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"3:30TO4:21",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"V"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"4:22TO5:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"U"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"5:14TO6:06",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"T"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"6:07TO6:58",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"S"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"6:59TO7:50",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"R"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"7:51TO8:42",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"Q"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"8:43TO9:34",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"P"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"9:35TO10:27",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"O"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"10:28TO11:19",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"N"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"11:20TO12:13",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"M"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"12:14TO13:30",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"L"
+    },
+    {
+        "Grupo de buceo sucesivo al principio del intervalo":"Z",
+        "Intervalo en superficie":"13:31TO15:50",
+        "Grupo de buceo sucesivo al final del intervalo en superficie":"K"
+    }
+]
