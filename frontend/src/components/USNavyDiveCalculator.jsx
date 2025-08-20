@@ -767,6 +767,7 @@ const USNavyDiveCalculator = () => {
                         onWarning={handleTimerWarning}
                         onError={handleTimerError}
                         onPopup={handleTimerPopup}
+                        compact={true}
                       />
                     </div>
                   )}
