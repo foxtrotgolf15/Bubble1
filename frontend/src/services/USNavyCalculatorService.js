@@ -569,7 +569,9 @@ class USNavyCalculatorService {
       periodCount++;
       
       if (periodCount === 1) {
-        // Period 1: First 15 min at 15m, then ascend to 12m, finish at 12m
+        // Period 1: EXACTLY 30 min total - 15 min at 15m + ascent + remainder at 12m
+        
+        // First 15 min at 15m
         timeline.push({
           type: 'o2_period',
           depth: 15,
@@ -578,8 +580,8 @@ class USNavyCalculatorService {
           description: `Período 1 de O₂ - 15 min en 15m`
         });
 
-        // Ascent 15m → 12m during Period 1
-        const ascentTime = ((15 - 12) / 30) * 60; // 30 m/min ascent
+        // Ascent 15m → 12m during Period 1 (included in the 30-min period)
+        const ascentTime = ((15 - 12) / 30) * 60; // 30 m/min ascent = 6 seconds
         timeline.push({
           type: 'ascent',
           fromDepth: 15,
@@ -590,13 +592,14 @@ class USNavyCalculatorService {
           description: `Ascenso 15m → 12m durante Período 1 (30 m/min)`
         });
 
-        // Remaining 15 min of Period 1 at 12m
+        // Remaining time of Period 1 at 12m (30:00 - 15:00 - ascent_time)
+        const remainingTimeSeconds = (30 * 60) - (15 * 60) - ascentTime;
         timeline.push({
           type: 'o2_period',
           depth: 12,
-          time: 15 * 60,
+          time: remainingTimeSeconds,
           gas: 'O₂',
-          description: `Período 1 de O₂ - 15 min restantes en 12m`
+          description: `Período 1 de O₂ - ${this.formatTime(remainingTimeSeconds)} restantes en 12m`
         });
 
         chamberDepth = 12;
