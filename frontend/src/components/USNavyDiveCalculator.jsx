@@ -559,7 +559,7 @@ const USNavyDiveCalculator = () => {
               onChange={(e) => setFormData({...formData, isRepetitive: e.target.checked})}
             />
             <Label htmlFor="isRepetitive" className="text-sm">
-              Este es un buceo repetitivo
+              ¿El buzo ha realizado otra inmersión en las 12 horas previas?
             </Label>
           </div>
 
