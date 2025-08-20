@@ -474,8 +474,8 @@ class USNavyCalculatorService {
     const stops = this.extractStops(entry);
     let currentDepth = realDepth;
 
-    // Phase 1: In-water decompression (complete all stops at 12m and deeper)
-    const deepStops = stops.filter(stop => stop.depth >= 12);
+    // Phase 1: In-water decompression (complete all stops at 12.2m and deeper)
+    const deepStops = stops.filter(stop => stop.depth >= 12.2);
     
     deepStops.forEach(stop => {
       // Ascent to stop at 9 m/min
@@ -508,41 +508,41 @@ class USNavyCalculatorService {
     // Determine ascent speed from current depth to surface
     let ascentSpeed = 9; // Default 9 m/min
     
-    // Check if we have a 12m (40fsw) stop
-    const has12mStop = stops.some(stop => stop.depth === 12);
+    // Check if we have a 12.2m (40fsw) stop
+    const has12_2mStop = stops.some(stop => stop.depth === 12.2);
     
-    if (has12mStop) {
+    if (has12_2mStop) {
       // If 40 fsw stop required: ascend 40 fsw → surface at 40 fsw/min (≈12 m/min)
       ascentSpeed = 12;
     } else {
       // If no 40 fsw stop: ascend bottom → 40 fsw at 30 fsw/min (≈9 m/min), then 40 fsw → surface at 40 fsw/min
-      if (currentDepth > 12) {
-        // First ascent to 12m at 9 m/min
-        const ascentTo12Time = ((currentDepth - 12) / 9) * 60;
+      if (currentDepth > 12.2) {
+        // First ascent to 12.2m at 9 m/min
+        const ascentTo12_2Time = ((currentDepth - 12.2) / 9) * 60;
         timeline.push({
           type: 'ascent',
           fromDepth: currentDepth,
-          toDepth: 12,
-          time: ascentTo12Time,
+          toDepth: 12.2,
+          time: ascentTo12_2Time,
           speed: 9,
           gas: 'Aire',
-          description: `Ascenso de ${currentDepth}m a 12m (9 m/min)`
+          description: `Ascenso de ${currentDepth}m a 12.2m (9 m/min)`
         });
-        currentDepth = 12;
+        currentDepth = 12.2;
       }
-      ascentSpeed = 12; // Then 12m to surface at 12 m/min
+      ascentSpeed = 12; // Then 12.2m to surface at 12 m/min
     }
 
-    // Ascent to surface
+    // Ascent to surface - this is the SurDO₂ transfer ascent
     const surfaceAscentTime = (currentDepth / ascentSpeed) * 60;
     timeline.push({
-      type: 'ascent',
+      type: 'surdo2_transfer',
       fromDepth: currentDepth,
       toDepth: 0,
       time: surfaceAscentTime,
       speed: ascentSpeed,
       gas: 'Aire',
-      description: `Ascenso de ${currentDepth}m a superficie (${ascentSpeed} m/min)`
+      description: `Transferencia SurDO₂: Ascenso de ${currentDepth}m a superficie (${ascentSpeed} m/min)`
     });
 
     // Surface Interval (COUNT-UP TIMER with 5/7 min logic)
@@ -582,61 +582,61 @@ class USNavyCalculatorService {
       periodCount++;
       
       if (periodCount === 1) {
-        // Period 1: EXACTLY 30 min total - 15 min at 15m + ascent + remainder at 12m
+        // Period 1: EXACTLY 30 min total - 15 min at 15m + ascent + remainder at 12.2m
         
         // First 15 min at 15m
         timeline.push({
-          type: 'o2_period',
+          type: 'chamber_o2_period',
           depth: 15,
           time: 15 * 60,
           gas: 'O₂',
           description: `Período 1 de O₂ - 15 min en 15m`
         });
 
-        // Ascent 15m → 12m during Period 1 (included in the 30-min period)
-        const ascentTime = ((15 - 12) / 30) * 60; // 30 m/min ascent = 6 seconds
+        // Ascent 15m → 12.2m during Period 1 (included in the 30-min period)
+        const ascentTime = ((15 - 12.2) / 30) * 60; // 30 m/min ascent
         timeline.push({
           type: 'ascent',
           fromDepth: 15,
-          toDepth: 12,
+          toDepth: 12.2,
           time: ascentTime,
           speed: 30,
           gas: 'O₂',
-          description: `Ascenso 15m → 12m durante Período 1 (30 m/min)`
+          description: `Ascenso 15m → 12.2m durante Período 1 (30 m/min)`
         });
 
-        // Remaining time of Period 1 at 12m (30:00 - 15:00 - ascent_time)
+        // Remaining time of Period 1 at 12.2m (30:00 - 15:00 - ascent_time)
         const remainingTimeSeconds = (30 * 60) - (15 * 60) - ascentTime;
         timeline.push({
-          type: 'o2_period',
-          depth: 12,
+          type: 'chamber_o2_period',
+          depth: 12.2,
           time: remainingTimeSeconds,
           gas: 'O₂',
-          description: `Período 1 de O₂ - ${this.formatTime(remainingTimeSeconds)} restantes en 12m`
+          description: `Período 1 de O₂ - ${this.formatTime(remainingTimeSeconds)} restantes en 12.2m`
         });
 
-        chamberDepth = 12;
+        chamberDepth = 12.2;
         remainingPeriods -= 1;
 
         if (remainingPeriods > 0) {
           // Air break after Period 1
           timeline.push({
             type: 'air_break',
-            depth: 12,
+            depth: 12.2,
             time: 5 * 60,
             gas: 'Aire',
             description: `Descanso con aire - 5 min`
           });
         }
       } else if (periodCount <= 4) {
-        // Periods 2-4: Full 30 min at 12m
+        // Periods 2-4: Full 30 min at 12.2m
         const periodTime = Math.min(remainingPeriods, 1) * 30 * 60;
         timeline.push({
-          type: 'o2_period',
-          depth: 12,
+          type: 'chamber_o2_period',
+          depth: 12.2,
           time: periodTime,
           gas: 'O₂',
-          description: `Período ${periodCount} de O₂ - ${Math.min(remainingPeriods, 1) * 30} min en 12m`
+          description: `Período ${periodCount} de O₂ - ${Math.min(remainingPeriods, 1) * 30} min en 12.2m`
         });
 
         remainingPeriods -= Math.min(remainingPeriods, 1);
@@ -645,7 +645,7 @@ class USNavyCalculatorService {
           // Air break
           timeline.push({
             type: 'air_break',
-            depth: 12,
+            depth: 12.2,
             time: 5 * 60,
             gas: 'Aire',
             description: `Descanso con aire - 5 min`
@@ -653,16 +653,16 @@ class USNavyCalculatorService {
 
           // Check if we need to ascend to 9m before Period 5
           if (periodCount === 4 && remainingPeriods > 0) {
-            // Ascent 12m → 9m during air break
-            const ascentTime = ((12 - 9) / 30) * 60;
+            // Ascent 12.2m → 9m during air break
+            const ascentTime = ((12.2 - 9) / 30) * 60;
             timeline.push({
               type: 'ascent',
-              fromDepth: 12,
+              fromDepth: 12.2,
               toDepth: 9,
               time: ascentTime,
               speed: 30,
               gas: 'Aire',
-              description: `Ascenso 12m → 9m durante descanso (30 m/min)`
+              description: `Ascenso 12.2m → 9m durante descanso (30 m/min)`
             });
             chamberDepth = 9;
           }
@@ -671,7 +671,7 @@ class USNavyCalculatorService {
         // Periods 5+: At 9m
         const periodTime = Math.min(remainingPeriods, 1) * 30 * 60;
         timeline.push({
-          type: 'o2_period',
+          type: 'chamber_o2_period',
           depth: 9,
           time: periodTime,
           gas: 'O₂',
