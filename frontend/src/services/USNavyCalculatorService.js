@@ -753,6 +753,7 @@ class USNavyCalculatorService {
       let effectiveDepth = equivalentDepth;
       let finalRepetitiveGroup = '';
       let altitudeRepetitiveGroup = null;
+      let altitudeWarning = null;
 
       // Step 2: Handle altitude <12h logic
       if (altitude > 0 && isAltitudeLessThan12h && altitudeArrivalTime) {
@@ -771,91 +772,45 @@ class USNavyCalculatorService {
         }
 
         altitudeRepetitiveGroup = altitudeResult.group;
+        altitudeWarning = altitudeResult.warning;
         
-        // Show precision warning if applicable
-        if (altitudeResult.warning) {
-          // We'll pass this warning back in the result
+        // Apply repetitive dive logic using altitude-derived group
+        const repetitiveResult = this.processRepetitiveDive(
+          altitudeRepetitiveGroup,
+          surfaceIntervalAtAltitude,
+          equivalentDepth,
+          bottomTime,
+          previousBottomTime,
+          previousDepth
+        );
+
+        if (!repetitiveResult.success) {
+          return repetitiveResult;
         }
 
-        // Treat altitude group as repetitive group for further processing
-        if (!isRepetitive) {
-          // Make local copies for processing
-          let localIsRepetitive = true;
-          let localRepetitiveGroup = altitudeRepetitiveGroup;
-          let localSurfaceInterval = surfaceIntervalAtAltitude;
-          
-          // Continue with repetitive processing using local variables
-          if (localIsRepetitive && localRepetitiveGroup && localSurfaceInterval !== '') {
-            const surfaceIntervalNum = parseInt(localSurfaceInterval);
-            
-            if (surfaceIntervalNum < 10) {
-              // <10 min rule: treat as single dive
-              effectiveBottomTime = previousBottomTime + bottomTime;
-              effectiveDepth = Math.max(previousDepth, equivalentDepth);
-            } else {
-              // Normal repetitive dive workflow
-              
-              // Step 3a: Get new repetitive group from tabla_2_1
-              const newGroup = this.getNewRepetitiveGroup(localRepetitiveGroup, surfaceIntervalNum);
-              
-              // Step 3b: Get RNT from tabla_2_2
-              const rnt = this.getRNT(newGroup, equivalentDepth);
-              
-              if (rnt === '**') {
-                return {
-                  success: false,
-                  error: 'No está permitido realizar buceos sucesivos con este buzo (siguiendo las reglas del US Navy Rev 7).'
-                };
-              }
-              
-              if (rnt === null) {
-                return {
-                  success: false,
-                  error: 'No se pudo determinar el tiempo de nitrógeno residual para esta profundidad.'
-                };
-              }
-              
-              // Step 3c: Adjust bottom time
-              effectiveBottomTime = bottomTime + rnt;
-            }
-          }
-        }
+        effectiveBottomTime = repetitiveResult.effectiveBottomTime;
+        effectiveDepth = repetitiveResult.effectiveDepth;
       }
 
-      // Step 3: Handle repetitive dives (original logic)
+      // Step 3: Handle regular repetitive dives
       if (isRepetitive && repetitiveGroup && surfaceInterval !== '') {
         const surfaceIntervalNum = parseInt(surfaceInterval);
         
-        if (surfaceIntervalNum < 10) {
-          // <10 min rule: treat as single dive
-          effectiveBottomTime = previousBottomTime + bottomTime;
-          effectiveDepth = Math.max(previousDepth, equivalentDepth);
-        } else {
-          // Normal repetitive dive workflow
-          
-          // Step 3a: Get new repetitive group from tabla_2_1
-          const newGroup = this.getNewRepetitiveGroup(repetitiveGroup, surfaceIntervalNum);
-          
-          // Step 3b: Get RNT from tabla_2_2
-          const rnt = this.getRNT(newGroup, equivalentDepth);
-          
-          if (rnt === '**') {
-            return {
-              success: false,
-              error: 'No está permitido realizar buceos sucesivos con este buzo (siguiendo las reglas del US Navy Rev 7).'
-            };
-          }
-          
-          if (rnt === null) {
-            return {
-              success: false,
-              error: 'No se pudo determinar el tiempo de nitrógeno residual para esta profundidad.'
-            };
-          }
-          
-          // Step 3c: Adjust bottom time
-          effectiveBottomTime = bottomTime + rnt;
+        const repetitiveResult = this.processRepetitiveDive(
+          repetitiveGroup,
+          surfaceIntervalNum,
+          equivalentDepth,
+          bottomTime,
+          previousBottomTime,
+          previousDepth
+        );
+
+        if (!repetitiveResult.success) {
+          return repetitiveResult;
         }
+
+        effectiveBottomTime = repetitiveResult.effectiveBottomTime;
+        effectiveDepth = repetitiveResult.effectiveDepth;
       }
 
       // Step 4: Find matching entry in tabla_1
@@ -895,7 +850,8 @@ class USNavyCalculatorService {
           tableDepth: entry['Profundidad (m)'],
           tableTime: entry['Tiempo de Fondo (min)'],
           effectiveBottomTime,
-          altitudeRepetitiveGroup
+          altitudeRepetitiveGroup,
+          altitudeWarning
         };
       }
 
@@ -927,9 +883,65 @@ class USNavyCalculatorService {
         tableDepth: entry['Profundidad (m)'],
         tableTime: entry['Tiempo de Fondo (min)'],
         effectiveBottomTime,
-        altitudeRepetitiveGroup
+        altitudeRepetitiveGroup,
+        altitudeWarning
       };
 
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Process repetitive dive logic - handles <10 min rule and normal repetitive workflow
+   */
+  processRepetitiveDive(repetitiveGroup, surfaceIntervalMinutes, equivalentDepth, bottomTime, previousBottomTime, previousDepth) {
+    try {
+      if (surfaceIntervalMinutes < 10) {
+        // <10 min rule: merge dives into one
+        const effectiveBottomTime = previousBottomTime + bottomTime;
+        const effectiveDepth = Math.max(previousDepth, equivalentDepth);
+        
+        return {
+          success: true,
+          effectiveBottomTime,
+          effectiveDepth
+        };
+      } else {
+        // Normal repetitive dive workflow (≥10 min)
+        
+        // Step 1: Get new repetitive group from tabla_2_1
+        const newGroup = this.getNewRepetitiveGroup(repetitiveGroup, surfaceIntervalMinutes);
+        
+        // Step 2: Get RNT from tabla_2_2
+        const rnt = this.getRNT(newGroup, equivalentDepth);
+        
+        if (rnt === '**') {
+          return {
+            success: false,
+            error: 'No está permitido realizar buceos sucesivos con este buzo (siguiendo las reglas del US Navy Rev 7).'
+          };
+        }
+        
+        if (rnt === null) {
+          return {
+            success: false,
+            error: 'No se pudo determinar el tiempo de nitrógeno residual para esta profundidad.'
+          };
+        }
+        
+        // Step 3: Adjust bottom time
+        const effectiveBottomTime = bottomTime + rnt;
+        
+        return {
+          success: true,
+          effectiveBottomTime,
+          effectiveDepth: equivalentDepth
+        };
+      }
     } catch (error) {
       return {
         success: false,
