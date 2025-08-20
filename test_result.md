@@ -354,6 +354,8 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Decompression Calculation Core Logic"
+  stuck_tasks:
     - "Enhanced Timers and Alerts (Screen 3)"
     - "Depth Images Display"
     - "Hydration Message Display"
@@ -361,9 +363,9 @@ test_plan:
     - "Long Dive Validation"
     - "Screen 2 Informational Note"
     - "Notification Management"
-  stuck_tasks: []
+    - "Decompression Calculation Core Logic"
   test_all: false
-  test_priority: "high_first"
+  test_priority: "critical_first"
 
 agent_communication:
     -agent: "testing"
@@ -372,3 +374,5 @@ agent_communication:
     -message: "TESTING COMPLETED SUCCESSFULLY - All major functionality working correctly. Spanish interface verified, navigation flow tested, form validation working, API integration functional, and decompression calculations accurate. Test Case 1 (no decompression) passed, Test Case 3 (multiple stops) showed single stop which is correct based on US Navy Rev 7 table data. Minor observation: Test Case 2 showed no decompression instead of expected single stop, but this appears to be accurate based on the decompression table data for 18m/45min parameters."
     -agent: "testing"
     -message: "Starting testing of ENHANCED FEATURES: Timers and Alerts, Depth Images, Hydration Message, Simplified Summary, Long Dive Validation, Screen 2 Informational Note, and Notification Management as requested in the review"
+    -agent: "testing"
+    -message: "CRITICAL TESTING RESULTS: 1) CORE FUNCTIONALITY BROKEN - ALL decompression calculations fail with table lookup error, blocking entire application functionality. 2) ENHANCED FEATURES NOT INTEGRATED - All enhanced components (DiveTimer, DepthImage, NotificationManager) exist as separate files but are NOT integrated into the main USNavyDiveCalculator component. 3) BASIC INTERFACE WORKING - Spanish labels, form validation, mode selection, and navigation structure work correctly. IMMEDIATE ACTION REQUIRED: Fix decompression calculation logic and integrate enhanced components."
