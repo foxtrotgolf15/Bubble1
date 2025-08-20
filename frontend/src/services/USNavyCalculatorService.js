@@ -64,8 +64,8 @@ class USNavyCalculatorService {
 
     const modeField = modeFieldMap[mode];
     
-    // Find entries where the mode flag is "Sí"
-    const validEntries = this.tabla1.filter(entry => entry[modeField] === 'Sí');
+    // Find entries where the mode flag is "Si" (without accent)
+    const validEntries = this.tabla1.filter(entry => entry[modeField] === 'Si');
     
     if (validEntries.length === 0) {
       return null;
