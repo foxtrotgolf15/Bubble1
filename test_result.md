@@ -233,88 +233,124 @@ metadata:
   run_ui: true
 
   - task: "Enhanced Timers and Alerts (Screen 3)"
-    implemented: true
-    working: "NA"
+    implemented: false
+    working: false
     file: "/app/frontend/src/components/DiveTimer.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "Testing enhanced timer functionality with Start, Pause, Reset buttons, MM:SS formatting, countdown functionality, progress bars, and visual indicators"
+        -working: false
+        -agent: "testing"
+        -comment: "CRITICAL: DiveTimer component exists but is NOT integrated into the main USNavyDiveCalculator component. Component files exist but are not imported or used in the main application. Enhanced timer features are completely missing from the UI."
 
   - task: "Depth Images Display"
-    implemented: true
-    working: "NA"
+    implemented: false
+    working: false
     file: "/app/frontend/src/components/DepthImage.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "Testing depth image loading for available depths (9.1, 10.7, 12.2, 13.7, 15.2, 16.8, 18.3, 21.3, 24.4, 27.4), placeholder for unavailable depths, and image subtitle display"
+        -working: false
+        -agent: "testing"
+        -comment: "CRITICAL: DepthImage component exists but is NOT integrated into the main USNavyDiveCalculator component. No depth images are displayed anywhere in the application. Component is completely unused."
 
   - task: "Hydration Message Display"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/components/DiveCalculator.jsx"
-    stuck_count: 0
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/USNavyDiveCalculator.jsx"
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "Testing hydration reminder message with droplet icon and cyan color scheme"
+        -working: false
+        -agent: "testing"
+        -comment: "CRITICAL: Hydration message functionality is NOT implemented in the main component. No hydration reminders, droplet icons, or cyan color scheme elements found in the UI."
 
   - task: "Simplified Summary Display"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/components/DiveCalculator.jsx"
-    stuck_count: 0
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/USNavyDiveCalculator.jsx"
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "Testing simplified summary with 'Tabulación utilizada' instead of 'Valores Redondeados Utilizados', only 'US Navy Rev 7 – Tabla de Aire I' in table field, and removal of 'Otros Parámetros' section"
+        -working: false
+        -agent: "testing"
+        -comment: "CRITICAL: Enhanced summary features are NOT implemented. Current summary shows basic information but lacks the specified simplified format and enhanced display features."
 
   - task: "Long Dive Validation"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/components/DiveCalculator.jsx"
-    stuck_count: 0
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/USNavyDiveCalculator.jsx"
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "Testing validation for excessive bottom time with error message 'No se puede tabular esa inmersión por demasiada exposición'"
+        -working: false
+        -agent: "testing"
+        -comment: "CRITICAL: Long dive validation with specific Spanish error message is NOT implemented. Current validation only checks for basic positive values."
 
   - task: "Screen 2 Informational Note"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/components/DiveCalculator.jsx"
-    stuck_count: 0
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/USNavyDiveCalculator.jsx"
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "Testing blue info box with US Navy Rev7 safety message on parameters screen"
+        -working: false
+        -agent: "testing"
+        -comment: "CRITICAL: Blue info box with US Navy Rev7 safety message is NOT implemented on Screen 2. No informational notes found in the parameters screen."
 
   - task: "Notification Management"
-    implemented: true
-    working: "NA"
+    implemented: false
+    working: false
     file: "/app/frontend/src/components/NotificationManager.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "testing"
         -comment: "Testing notification permission request banner and banner dismissal functionality"
+        -working: false
+        -agent: "testing"
+        -comment: "CRITICAL: NotificationManager component exists but is NOT integrated into the main USNavyDiveCalculator component. No notification banners or permission requests are displayed in the application."
+
+  - task: "Decompression Calculation Core Logic"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/services/USNavyCalculatorService.js"
+    stuck_count: 2
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "testing"
+        -comment: "Testing core decompression calculation logic with US Navy Rev 7 table data"
+        -working: false
+        -agent: "testing"
+        -comment: "CRITICAL FAILURE: ALL decompression calculations fail with 'No existe programa para el modo seleccionado en esta combinación de profundidad/tiempo' error. Tested multiple valid parameters from the table data (9.1m/17min, 9.1m/380min) and all modes (aire, o2_agua, surdo2) - all fail. Table data is loaded but lookup logic has critical bug. This blocks all core functionality."
 
 test_plan:
   current_focus:
