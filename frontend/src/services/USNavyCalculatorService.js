@@ -353,7 +353,6 @@ class USNavyCalculatorService {
   generateO2WaterDecompressionTimeline(entry, realDepth) {
     const timeline = [];
     let currentDepth = realDepth;
-    let totalTime = 0;
     
     const stops = this.extractStops(entry);
 
@@ -371,7 +370,6 @@ class USNavyCalculatorService {
           gas: 'Aire',
           description: `Ascenso de ${currentDepth}m a ${stop.depth}m (9 m/min)`
         });
-        totalTime += ascentTime;
       }
 
       // Determine gas type: O₂ at 9m and 6m, Air for deeper stops
@@ -401,7 +399,6 @@ class USNavyCalculatorService {
             description: segment.description
           });
         });
-        totalTime += stop.time * 60; // Only count O₂ time, not breaks
       } else {
         // Regular air stop
         const stopTimeSeconds = stop.time * 60;
@@ -412,7 +409,6 @@ class USNavyCalculatorService {
           gas: gas,
           description: `Parada de descompresión en ${stop.depth}m con ${gas}`
         });
-        totalTime += stopTimeSeconds;
       }
 
       currentDepth = stop.depth;
@@ -430,8 +426,12 @@ class USNavyCalculatorService {
         gas: 'Aire',
         description: `Ascenso final a superficie (9 m/min)`
       });
-      totalTime += finalAscentTime;
     }
+
+    // Calculate total time by summing ALL fixed-duration segments (excluding count-up timers)
+    const totalTime = timeline
+      .filter(segment => !segment.isTimer) // Exclude count-up timers
+      .reduce((sum, segment) => sum + segment.time, 0);
 
     return { timeline, totalTime };
   }
