@@ -423,13 +423,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Enhanced Timers and Alerts (Screen 3)"
-    - "Depth Images Display"
-    - "Hydration Message Display"
-    - "Simplified Summary Display"
-    - "Long Dive Validation"
-    - "Screen 2 Informational Note"
-    - "Notification Management"
+    - "Bug A: Total Time Calculation Fix"
+    - "Bug B: SurDO₂ First Period Timing Fix"
+    - "Bug C: Altitude Repetitive Group Fix"
+    - "Bug D: Repetitive Dive Logic Fix"
   stuck_tasks:
     - "Enhanced Timers and Alerts (Screen 3)"
     - "Depth Images Display"
