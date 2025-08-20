@@ -248,7 +248,6 @@ class USNavyCalculatorService {
   generateAirDecompressionTimeline(entry, realDepth) {
     const timeline = [];
     let currentDepth = realDepth;
-    let totalTime = 0;
     
     const stops = this.extractStops(entry);
 
@@ -266,7 +265,6 @@ class USNavyCalculatorService {
           gas: 'Aire',
           description: `Ascenso de ${currentDepth}m a ${stop.depth}m (9 m/min)`
         });
-        totalTime += ascentTime;
       }
 
       // Decompression stop
@@ -278,7 +276,6 @@ class USNavyCalculatorService {
         gas: 'Aire',
         description: `Parada de descompresión en ${stop.depth}m`
       });
-      totalTime += stopTimeSeconds;
       currentDepth = stop.depth;
     });
 
@@ -294,8 +291,12 @@ class USNavyCalculatorService {
         gas: 'Aire',
         description: `Ascenso final a superficie (9 m/min)`
       });
-      totalTime += finalAscentTime;
     }
+
+    // Calculate total time by summing ALL fixed-duration segments
+    const totalTime = timeline
+      .filter(segment => !segment.isTimer) // Exclude count-up timers
+      .reduce((sum, segment) => sum + segment.time, 0);
 
     return { timeline, totalTime };
   }
