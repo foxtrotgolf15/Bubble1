@@ -642,70 +642,104 @@ const USNavyDiveCalculator = () => {
 
     return (
       <div className="space-y-3">
-        {results.timeline.map((segment, index) => (
-          <div key={index}>
-            <div className={`border rounded-lg p-4 ${
-              segment.type === 'ascent' ? 'bg-blue-50 border-blue-200' :
-              segment.type === 'stop' ? 'bg-orange-50 border-orange-200' :
-              segment.type === 'o2_period' ? 'bg-green-50 border-green-200' :
-              segment.type === 'air_break' ? 'bg-yellow-50 border-yellow-200' :
-              segment.type === 'compression' ? 'bg-purple-50 border-purple-200' :
-              segment.type === 'surface_interval' ? 'bg-cyan-50 border-cyan-200' :
-              segment.type === 'travel_shift_vent' ? 'bg-blue-50 border-blue-200' :
-              'bg-gray-50 border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    {segment.type === 'ascent' && <ArrowRight className="h-4 w-4 text-blue-600" />}
-                    {segment.type === 'stop' && <Clock className="h-4 w-4 text-orange-600" />}
-                    {segment.type === 'o2_period' && <Timer className="h-4 w-4 text-green-600" />}
-                    {segment.type === 'air_break' && <Clock className="h-4 w-4 text-yellow-600" />}
-                    {segment.type === 'compression' && <ArrowRight className="h-4 w-4 text-purple-600 rotate-90" />}
-                    {segment.type === 'surface_interval' && <AlertCircle className="h-4 w-4 text-cyan-600" />}
-                    {segment.type === 'travel_shift_vent' && <Timer className="h-4 w-4 text-blue-600" />}
-                    <span className="font-medium text-slate-800">
-                      {segment.description}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
-                    <div className="flex items-center gap-1">
-                      <Gauge className="h-3 w-3" />
-                      {segment.type === 'ascent' || segment.type === 'compression'
-                        ? `${segment.fromDepth}m → ${segment.toDepth}m`
-                        : `${segment.depth}m`
-                      }
+        {results.timeline.map((segment, index) => {
+          // Determine background color based on segment type and gas
+          let backgroundColor = 'bg-gray-50 border-gray-200'; // default
+          
+          if (segment.type === 'stop' && segment.gas === 'O₂') {
+            backgroundColor = 'bg-green-100 border-green-300'; // O₂ stops in water → bright green
+          } else if (segment.type === 'stop' && segment.gas === 'Aire') {
+            backgroundColor = 'bg-blue-50 border-blue-200'; // Air stops in water → light blue
+          } else if (segment.type === 'o2_period' && segment.gas === 'O₂') {
+            backgroundColor = 'bg-green-100 border-green-300'; // O₂ periods in water → bright green
+          } else if (segment.type === 'chamber_o2_period' && segment.gas === 'O₂') {
+            backgroundColor = 'bg-yellow-100 border-yellow-300'; // Chamber O₂ stops → yellow
+          } else if (segment.type === 'surdo2_transfer') {
+            backgroundColor = 'bg-red-100 border-red-300'; // Transfer from 12.2m to chamber → red
+          } else if (segment.type === 'ascent') {
+            backgroundColor = 'bg-blue-50 border-blue-200';
+          } else if (segment.type === 'air_break') {
+            backgroundColor = 'bg-yellow-50 border-yellow-200';
+          } else if (segment.type === 'compression') {
+            backgroundColor = 'bg-purple-50 border-purple-200';
+          } else if (segment.type === 'surface_interval') {
+            backgroundColor = 'bg-cyan-50 border-cyan-200';
+          } else if (segment.type === 'travel_shift_vent') {
+            backgroundColor = 'bg-blue-50 border-blue-200';
+          }
+
+          return (
+            <div key={index}>
+              <div className={`border rounded-lg p-4 ${backgroundColor}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      {segment.type === 'ascent' && <ArrowRight className="h-4 w-4 text-blue-600" />}
+                      {segment.type === 'stop' && <Clock className="h-4 w-4 text-orange-600" />}
+                      {(segment.type === 'o2_period' || segment.type === 'chamber_o2_period') && <Timer className="h-4 w-4 text-green-600" />}
+                      {segment.type === 'air_break' && <Clock className="h-4 w-4 text-yellow-600" />}
+                      {segment.type === 'compression' && <ArrowRight className="h-4 w-4 text-purple-600 rotate-90" />}
+                      {segment.type === 'surface_interval' && <AlertCircle className="h-4 w-4 text-cyan-600" />}
+                      {segment.type === 'travel_shift_vent' && <Timer className="h-4 w-4 text-blue-600" />}
+                      {segment.type === 'surdo2_transfer' && <ArrowRight className="h-4 w-4 text-red-600" />}
+                      <span className="font-medium text-slate-800">
+                        {segment.description}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {segment.isTimer && segment.timerType === 'countUp' 
-                        ? 'Temporizador' 
-                        : USNavyCalculatorService.formatTime(segment.time)
-                      }
-                    </div>
-                    <Badge variant={segment.gas === 'O₂' ? 'default' : 'secondary'}>
-                      {segment.gas}
-                    </Badge>
-                    {segment.speed && (
-                      <div className="text-xs text-slate-500">
-                        {segment.speed} m/min
+                    <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
+                      <div className="flex items-center gap-1">
+                        <Gauge className="h-3 w-3" />
+                        {segment.type === 'ascent' || segment.type === 'compression' || segment.type === 'surdo2_transfer'
+                          ? `${segment.fromDepth}m → ${segment.toDepth}m`
+                          : `${segment.depth}m`
+                        }
                       </div>
-                    )}
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {segment.isTimer && segment.timerType === 'countUp' 
+                          ? 'Temporizador' 
+                          : USNavyCalculatorService.formatTime(segment.time)
+                        }
+                      </div>
+                      <Badge variant={segment.gas === 'O₂' ? 'default' : 'secondary'}>
+                        {segment.gas}
+                      </Badge>
+                      {segment.speed && (
+                        <div className="text-xs text-slate-500">
+                          {segment.speed} m/min
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  
+                  {/* Timer positioned on the right side */}
+                  {segment.isTimer && (
+                    <div className="ml-4 flex-shrink-0">
+                      <CountUpTimerComponent 
+                        segment={segment}
+                        index={index}
+                        onWarning={handleTimerWarning}
+                        onError={handleTimerError}
+                        onPopup={handleTimerPopup}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
 
-            {/* Count-up Timer Component */}
-            <CountUpTimerComponent 
-              segment={segment}
-              index={index}
-              onWarning={handleTimerWarning}
-              onError={handleTimerError}
-              onPopup={handleTimerPopup}
-            />
-          </div>
-        ))}
+              {/* Count-up Timer Component - Only if not already rendered on the right */}
+              {!segment.isTimer && (
+                <CountUpTimerComponent 
+                  segment={segment}
+                  index={index}
+                  onWarning={handleTimerWarning}
+                  onError={handleTimerError}
+                  onPopup={handleTimerPopup}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   };
