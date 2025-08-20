@@ -1,8 +1,8 @@
-import tabla1 from '../../tables/tabla_1.json';
-import tabla2_1 from '../../tables/tabla_2_1.json';
-import tabla2_2 from '../../tables/tabla_2_2.json';
-import tabla3 from '../../tables/tabla_3.json';
-import tabla4 from '../../tables/tabla_4.json';
+import tabla1 from '../tables/tabla_1.json';
+import tabla2_1 from '../tables/tabla_2_1.json';
+import tabla2_2 from '../tables/tabla_2_2.json';
+import tabla3 from '../tables/tabla_3.json';
+import tabla4 from '../tables/tabla_4.json';
 
 class USNavyCalculatorService {
   constructor() {
