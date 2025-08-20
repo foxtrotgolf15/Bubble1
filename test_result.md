@@ -282,6 +282,9 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "VERIFIED - Bug C fix working correctly. Altitude calculations properly implemented using tabla_3 lookup. Test cases: 1000m altitude gives Repetitive Group G (appropriate for altitude range), 2500m altitude gives Group L (high altitude handled correctly). Altitude repetitive groups determined accurately for <12h scenarios. Precision warnings logic implemented but not exposed in current API response."
+        -working: true
+        -agent: "testing"
+        -comment: "FRONTEND INTEGRATION VERIFIED - Bug C fix working in frontend. Altitude form fields present and functional: altitude input, recalibration question, <12h question with conditional arrival time field. When altitude >0 and <12h selected, arrival time field appears correctly. Altitude repetitive group calculation and display working (shows 'Grupo por Altitud:' in results). Form validation prevents calculation without required altitude arrival time."
 
   - task: "Bug D: Repetitive Dive Logic Fix"
     implemented: true
