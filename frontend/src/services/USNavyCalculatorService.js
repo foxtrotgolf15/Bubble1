@@ -461,11 +461,11 @@ class USNavyCalculatorService {
             timeline.push({
               type: segment.type,
               depth: stop.depth,
-              time: segment.time * 60, // Convert to seconds
+              time: Math.round(segment.time * 60), // Convert to seconds and round
               gas: segment.gas,
               description: segment.description,
               hasCountdownTimer: segment.type === 'o2_period' || segment.type === 'air_break',
-              requiredTime: segment.time * 60
+              requiredTime: Math.round(segment.time * 60)
             });
           });
         } else {
