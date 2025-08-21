@@ -156,7 +156,7 @@ const USNavyDiveCalculator = () => {
   // Timer Component - handles both countdown timers for stops and count-up timers for transitions
   const TimerComponent = ({ segment, index, onWarning, onError, onPopup, onTransitionAdjustment, embedded = false }) => {
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
-    const [countdownSeconds, setCountdownSeconds] = useState(segment.requiredTime || 0);
+    const [countdownSeconds, setCountdownSeconds] = useState(Math.round(segment.requiredTime || 0));
     const [isRunning, setIsRunning] = useState(false);
     const [hasWarned, setHasWarned] = useState(false);
     const [hasErrored, setHasErrored] = useState(false);
