@@ -416,7 +416,7 @@ class USNavyCalculatorService {
       const firstStop = stops[0];
       const firstAscentDistance = currentDepth - firstStop.depth;
       if (firstAscentDistance > 0) {
-        const firstAscentTime = (firstAscentDistance / 9) * 60;
+        const firstAscentTime = Math.round((firstAscentDistance / 9) * 60);
         timeline.push({
           type: 'ascent',
           fromDepth: currentDepth,
