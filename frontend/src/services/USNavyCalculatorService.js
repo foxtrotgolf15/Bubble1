@@ -1007,7 +1007,7 @@ class USNavyCalculatorService {
 
       // Step 5: Check if it's a no-decompression dive
       if (this.isNoDecompressionDive(entry)) {
-        const ascentTime = (realDepth / 9) * 60; // 9 m/min
+        const ascentTime = Math.round((realDepth / 9) * 60); // 9 m/min
         return {
           success: true,
           noDecompression: true,
