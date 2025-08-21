@@ -29,6 +29,9 @@ const USNavyDiveCalculator = () => {
   });
   const [results, setResults] = useState(null);
   const [errors, setErrors] = useState({});
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState('info');
 
   const modeOptions = [
     { value: 'aire', label: 'Descompresión con aire' },
