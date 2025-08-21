@@ -294,7 +294,7 @@ class USNavyCalculatorService {
     stops.forEach((stop, index) => {
       if (index === 0) {
         // First stop (no ascent merged, already handled above)
-        const stopTimeSeconds = stop.time * 60;
+        const stopTimeSeconds = Math.round(stop.time * 60);
         timeline.push({
           type: 'stop',
           depth: stop.depth,
@@ -307,8 +307,8 @@ class USNavyCalculatorService {
       } else {
         // Intermediate stops: merge ascent time with stop time
         const ascentDistance = currentDepth - stop.depth;
-        const ascentTime = ascentDistance > 0 ? (ascentDistance / 9) * 60 : 0;
-        const stopTimeSeconds = stop.time * 60;
+        const ascentTime = ascentDistance > 0 ? Math.round((ascentDistance / 9) * 60) : 0;
+        const stopTimeSeconds = Math.round(stop.time * 60);
         const totalTime = ascentTime + stopTimeSeconds;
         
         timeline.push({
