@@ -416,18 +416,22 @@ class USNavyCalculatorService {
             depth: stop.depth,
             time: segment.time * 60, // Convert to seconds
             gas: segment.gas,
-            description: segment.description
+            description: segment.description,
+            hasCountdownTimer: segment.type === 'o2_period' || segment.type === 'air_break',
+            requiredTime: segment.time * 60
           });
         });
       } else {
-        // Regular air stop
+        // Regular air stop with countdown timer
         const stopTimeSeconds = stop.time * 60;
         timeline.push({
           type: 'stop',
           depth: stop.depth,
           time: stopTimeSeconds,
           gas: gas,
-          description: `Parada de descompresión en ${stop.depth}m con ${gas}`
+          description: `Parada de descompresión en ${stop.depth}m con ${gas}`,
+          hasCountdownTimer: true,
+          requiredTime: stopTimeSeconds
         });
       }
 
