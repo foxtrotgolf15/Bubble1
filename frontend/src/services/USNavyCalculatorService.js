@@ -493,14 +493,16 @@ class USNavyCalculatorService {
         });
       }
 
-      // Decompression stop
+      // Decompression stop with countdown timer
       const stopTimeSeconds = stop.time * 60;
       timeline.push({
         type: 'stop',
         depth: stop.depth,
         time: stopTimeSeconds,
         gas: 'Aire',
-        description: `Parada de descompresión en ${stop.depth}m`
+        description: `Parada de descompresión en ${stop.depth}m`,
+        hasCountdownTimer: true,
+        requiredTime: stopTimeSeconds
       });
       currentDepth = stop.depth;
     });
@@ -533,43 +535,28 @@ class USNavyCalculatorService {
       ascentSpeed = 12; // Then 12.2m to surface at 12 m/min
     }
 
-    // Ascent to surface - this is the SurDO₂ transfer ascent
+    // UNIFIED SurDO₂ TRANSITION BLOCK - combining ascent + surface interval + compression
     const surfaceAscentTime = (currentDepth / ascentSpeed) * 60;
+    const compressionTime = (15 / 30) * 60; // 30 m/min descent rate
+    
     timeline.push({
-      type: 'surdo2_transfer',
+      type: 'surdo2_unified_transition',
       fromDepth: currentDepth,
-      toDepth: 0,
-      time: surfaceAscentTime,
+      toDepth: 15, // Final compression depth
+      time: surfaceAscentTime + compressionTime, // Combined time
       speed: ascentSpeed,
       gas: 'Aire',
-      description: `Transferencia SurDO₂: Ascenso de ${currentDepth}m a superficie (${ascentSpeed} m/min)`
-    });
-
-    // Surface Interval (COUNT-UP TIMER with 5/7 min logic)
-    timeline.push({
-      type: 'surface_interval',
-      depth: 0,
-      time: 0, // Count-up timer starts at 0
-      gas: 'Aire',
-      description: `Intervalo en superficie - Contando tiempo`,
-      isTimer: true,
+      description: `Transición SurDO₂: ${currentDepth}m → Superficie → Cámara 15m`,
+      details: {
+        ascentTime: surfaceAscentTime,
+        compressionTime: compressionTime,
+        ascentSpeed: ascentSpeed
+      },
+      isTransitionTimer: true,
       timerType: 'countUp',
       warningThreshold: 300, // 5 minutes
       errorThreshold: 420,   // 7 minutes
-      popupThresholdMin: 300,
-      popupThresholdMax: 420
-    });
-
-    // Phase 2: Chamber compression to 15m (50 fsw) on air
-    const compressionTime = (15 / 30) * 60; // 30 m/min descent rate
-    timeline.push({
-      type: 'compression',
-      fromDepth: 0,
-      toDepth: 15,
-      time: compressionTime,
-      speed: 30,
-      gas: 'Aire',
-      description: `Compresión en cámara a 15m (30 m/min)`
+      transitionLogic: true
     });
 
     // Phase 3: O₂ periods in chamber
@@ -583,14 +570,19 @@ class USNavyCalculatorService {
       
       if (periodCount === 1) {
         // Period 1: EXACTLY 30 min total - 15 min at 15m + ascent + remainder at 12.2m
+        // This will be dynamically adjusted based on transition time
         
-        // First 15 min at 15m
+        // First 15 min at 15m (base time, may be extended)
         timeline.push({
           type: 'chamber_o2_period',
           depth: 15,
-          time: 15 * 60,
+          time: 15 * 60, // Base time - will be adjusted if needed
           gas: 'O₂',
-          description: `Período 1 de O₂ - 15 min en 15m`
+          description: `Período 1 de O₂ - 15 min en 15m`,
+          hasCountdownTimer: true,
+          requiredTime: 15 * 60,
+          isAdjustablePeriod: true, // This period can be extended
+          baseTime: 15 * 60
         });
 
         // Ascent 15m → 12.2m during Period 1 (included in the 30-min period)
@@ -612,7 +604,9 @@ class USNavyCalculatorService {
           depth: 12.2,
           time: remainingTimeSeconds,
           gas: 'O₂',
-          description: `Período 1 de O₂ - ${this.formatTime(remainingTimeSeconds)} restantes en 12.2m`
+          description: `Período 1 de O₂ - ${this.formatTime(remainingTimeSeconds)} restantes en 12.2m`,
+          hasCountdownTimer: true,
+          requiredTime: remainingTimeSeconds
         });
 
         chamberDepth = 12.2;
@@ -625,7 +619,9 @@ class USNavyCalculatorService {
             depth: 12.2,
             time: 5 * 60,
             gas: 'Aire',
-            description: `Descanso con aire - 5 min`
+            description: `Descanso con aire - 5 min`,
+            hasCountdownTimer: true,
+            requiredTime: 5 * 60
           });
         }
       } else if (periodCount <= 4) {
@@ -636,7 +632,9 @@ class USNavyCalculatorService {
           depth: 12.2,
           time: periodTime,
           gas: 'O₂',
-          description: `Período ${periodCount} de O₂ - ${Math.min(remainingPeriods, 1) * 30} min en 12.2m`
+          description: `Período ${periodCount} de O₂ - ${Math.min(remainingPeriods, 1) * 30} min en 12.2m`,
+          hasCountdownTimer: true,
+          requiredTime: periodTime
         });
 
         remainingPeriods -= Math.min(remainingPeriods, 1);
@@ -648,7 +646,9 @@ class USNavyCalculatorService {
             depth: 12.2,
             time: 5 * 60,
             gas: 'Aire',
-            description: `Descanso con aire - 5 min`
+            description: `Descanso con aire - 5 min`,
+            hasCountdownTimer: true,
+            requiredTime: 5 * 60
           });
 
           // Check if we need to ascend to 9m before Period 5
@@ -675,7 +675,9 @@ class USNavyCalculatorService {
           depth: 9,
           time: periodTime,
           gas: 'O₂',
-          description: `Período ${periodCount} de O₂ - ${Math.min(remainingPeriods, 1) * 30} min en 9m`
+          description: `Período ${periodCount} de O₂ - ${Math.min(remainingPeriods, 1) * 30} min en 9m`,
+          hasCountdownTimer: true,
+          requiredTime: periodTime
         });
 
         remainingPeriods -= Math.min(remainingPeriods, 1);
@@ -687,7 +689,9 @@ class USNavyCalculatorService {
             depth: 9,
             time: 5 * 60,
             gas: 'Aire',
-            description: `Descanso con aire - 5 min`
+            description: `Descanso con aire - 5 min`,
+            hasCountdownTimer: true,
+            requiredTime: 5 * 60
           });
         }
       }
@@ -707,7 +711,7 @@ class USNavyCalculatorService {
 
     // Calculate total time by summing ALL fixed-duration segments (excluding count-up timers)
     const totalTime = timeline
-      .filter(segment => !segment.isTimer) // Exclude count-up timers
+      .filter(segment => !segment.isTimer && !segment.isTransitionTimer) // Exclude count-up timers
       .reduce((sum, segment) => sum + segment.time, 0);
 
     return { timeline, totalTime };
