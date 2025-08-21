@@ -735,6 +735,13 @@ const USNavyDiveCalculator = () => {
             backgroundColor = 'bg-yellow-100 border-yellow-300'; // Chamber O₂ stops → yellow
           } else if (segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition') {
             backgroundColor = 'bg-red-100 border-red-300'; // Transfer from 12.2m to chamber → red
+          } else if (segment.type === 'merged_stop' || segment.type === 'merged_o2_stop') {
+            // Merged stops get same color as their gas type
+            if (segment.gas === 'O₂') {
+              backgroundColor = 'bg-green-100 border-green-300'; // O₂ merged stops → bright green
+            } else {
+              backgroundColor = 'bg-blue-50 border-blue-200'; // Air merged stops → light blue
+            }
           } else if (segment.type === 'ascent') {
             backgroundColor = 'bg-blue-50 border-blue-200';
           } else if (segment.type === 'air_break') {
@@ -753,7 +760,7 @@ const USNavyDiveCalculator = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      {segment.type === 'ascent' && <ArrowRight className="h-4 w-4 text-blue-600" />}
+                      {(segment.type === 'ascent' || segment.type === 'merged_stop' || segment.type === 'merged_o2_stop') && <ArrowRight className="h-4 w-4 text-blue-600" />}
                       {segment.type === 'stop' && <Clock className="h-4 w-4 text-orange-600" />}
                       {(segment.type === 'o2_period' || segment.type === 'chamber_o2_period') && <Timer className="h-4 w-4 text-green-600" />}
                       {segment.type === 'air_break' && <Clock className="h-4 w-4 text-yellow-600" />}
@@ -768,8 +775,8 @@ const USNavyDiveCalculator = () => {
                     <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
                       <div className="flex items-center gap-1">
                         <Gauge className="h-3 w-3" />
-                        {segment.type === 'ascent' || segment.type === 'compression' || segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition'
-                          ? `${segment.fromDepth}m → ${segment.toDepth}m`
+                        {segment.type === 'ascent' || segment.type === 'compression' || segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition' || segment.type === 'merged_stop' || segment.type === 'merged_o2_stop'
+                          ? `${segment.fromDepth}m → ${segment.toDepth || segment.depth}m`
                           : `${segment.depth}m`
                         }
                       </div>
@@ -789,6 +796,15 @@ const USNavyDiveCalculator = () => {
                         </div>
                       )}
                     </div>
+                    
+                    {/* Show breakdown details for merged stops */}
+                    {(segment.type === 'merged_stop' || segment.type === 'merged_o2_stop') && segment.details && (
+                      <div className="mt-2 text-xs text-slate-600 bg-white bg-opacity-50 p-2 rounded border">
+                        <div>• {segment.details.ascent}</div>
+                        <div>• {segment.details.stop}</div>
+                        <div className="font-medium text-blue-700 mt-1">ℹ️ Temporizador incluye ascenso + parada</div>
+                      </div>
+                    )}
                     
                     {/* Show transition details for unified SurDO₂ block */}
                     {segment.type === 'surdo2_unified_transition' && segment.details && (
