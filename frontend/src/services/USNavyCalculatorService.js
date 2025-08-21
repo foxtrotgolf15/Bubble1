@@ -269,37 +269,69 @@ class USNavyCalculatorService {
     
     const stops = this.extractStops(entry);
 
-    stops.forEach((stop, index) => {
-      // Ascent to stop at 9 m/min
-      const ascentDistance = currentDepth - stop.depth;
-      if (ascentDistance > 0) {
-        const ascentTime = (ascentDistance / 9) * 60; // Convert to seconds
+    // Exception 1: First ascent from bottom to first decompression stop (independent)
+    if (stops.length > 0) {
+      const firstStop = stops[0];
+      const firstAscentDistance = currentDepth - firstStop.depth;
+      if (firstAscentDistance > 0) {
+        const firstAscentTime = (firstAscentDistance / 9) * 60; // Convert to seconds
         timeline.push({
           type: 'ascent',
           fromDepth: currentDepth,
-          toDepth: stop.depth,
-          time: ascentTime,
+          toDepth: firstStop.depth,
+          time: firstAscentTime,
           speed: 9,
           gas: 'Aire',
-          description: `Ascenso de ${currentDepth}m a ${stop.depth}m (9 m/min)`
+          description: `Ascenso inicial de ${currentDepth}m a ${firstStop.depth}m (9 m/min)`,
+          hasCountdownTimer: true,
+          requiredTime: firstAscentTime,
+          isIndependentAscent: true
+        });
+        currentDepth = firstStop.depth;
+      }
+    }
+
+    stops.forEach((stop, index) => {
+      if (index === 0) {
+        // First stop (no ascent merged, already handled above)
+        const stopTimeSeconds = stop.time * 60;
+        timeline.push({
+          type: 'stop',
+          depth: stop.depth,
+          time: stopTimeSeconds,
+          gas: 'Aire',
+          description: `Parada de descompresión en ${stop.depth}m`,
+          hasCountdownTimer: true,
+          requiredTime: stopTimeSeconds
+        });
+      } else {
+        // Intermediate stops: merge ascent time with stop time
+        const ascentDistance = currentDepth - stop.depth;
+        const ascentTime = ascentDistance > 0 ? (ascentDistance / 9) * 60 : 0;
+        const stopTimeSeconds = stop.time * 60;
+        const totalTime = ascentTime + stopTimeSeconds;
+        
+        timeline.push({
+          type: 'merged_stop',
+          depth: stop.depth,
+          fromDepth: currentDepth,
+          time: totalTime,
+          gas: 'Aire',
+          description: `Ascenso de ${currentDepth}m a ${stop.depth}m + Parada (${this.formatTime(totalTime)} total)`,
+          hasCountdownTimer: true,
+          requiredTime: totalTime,
+          ascentTime: ascentTime,
+          stopTime: stopTimeSeconds,
+          details: {
+            ascent: `${this.formatTime(ascentTime)} ascenso (9 m/min)`,
+            stop: `${this.formatTime(stopTimeSeconds)} parada descompresión`
+          }
         });
       }
-
-      // Decompression stop with countdown timer
-      const stopTimeSeconds = stop.time * 60;
-      timeline.push({
-        type: 'stop',
-        depth: stop.depth,
-        time: stopTimeSeconds,
-        gas: 'Aire',
-        description: `Parada de descompresión en ${stop.depth}m`,
-        hasCountdownTimer: true,
-        requiredTime: stopTimeSeconds
-      });
       currentDepth = stop.depth;
     });
 
-    // Final ascent to surface at 9 m/min
+    // Exception 2: Final ascent to surface (independent)
     if (currentDepth > 0) {
       const finalAscentTime = (currentDepth / 9) * 60;
       timeline.push({
@@ -309,7 +341,10 @@ class USNavyCalculatorService {
         time: finalAscentTime,
         speed: 9,
         gas: 'Aire',
-        description: `Ascenso final a superficie (9 m/min)`
+        description: `Ascenso final a superficie de ${currentDepth}m (9 m/min)`,
+        hasCountdownTimer: true,
+        requiredTime: finalAscentTime,
+        isIndependentAscent: true
       });
     }
 
