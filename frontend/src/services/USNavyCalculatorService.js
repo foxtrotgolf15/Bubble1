@@ -675,7 +675,7 @@ class USNavyCalculatorService {
       // If no 40 fsw stop: ascend bottom → 40 fsw at 30 fsw/min (≈9 m/min), then 40 fsw → surface at 40 fsw/min
       if (currentDepth > 12.2) {
         // First ascent to 12.2m at 9 m/min - this becomes a merged stop with the virtual 12.2m stop
-        const ascentTo12_2Time = ((currentDepth - 12.2) / 9) * 60;
+        const ascentTo12_2Time = Math.round(((currentDepth - 12.2) / 9) * 60);
         timeline.push({
           type: 'merged_stop',
           depth: 12.2,
