@@ -696,13 +696,14 @@ class USNavyCalculatorService {
       fromDepth: currentDepth,
       toDepth: 15, // Final compression depth
       time: surfaceAscentTime + compressionTime, // Combined time
-      speed: ascentSpeed,
+      speed: 12, // 12 m/min for SurDO₂ ascent
       gas: 'Aire',
       description: `Transición SurDO₂: ${currentDepth}m → Superficie → Cámara 15m`,
       details: {
         ascentTime: surfaceAscentTime,
         compressionTime: compressionTime,
-        ascentSpeed: ascentSpeed
+        ascentSpeed: 12, // SurDO₂ specific rate
+        compressionSpeed: 30 // Rapid chamber compression
       },
       isTransitionTimer: true,
       timerType: 'countUp',
