@@ -471,7 +471,7 @@ class USNavyCalculatorService {
         } else {
           // Intermediate stops: merge ascent time with first O₂ period
           const ascentDistance = currentDepth - stop.depth;
-          const ascentTime = ascentDistance > 0 ? (ascentDistance / 9) * 60 : 0;
+          const ascentTime = ascentDistance > 0 ? Math.round((ascentDistance / 9) * 60) : 0;
           
           let isFirstSegment = true;
           segments.forEach(segment => {
