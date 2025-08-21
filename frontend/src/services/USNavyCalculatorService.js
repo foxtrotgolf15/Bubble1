@@ -411,69 +411,148 @@ class USNavyCalculatorService {
     
     const stops = this.extractStops(entry);
 
-    stops.forEach((stop, index) => {
-      // Ascent to stop at 9 m/min
-      const ascentDistance = currentDepth - stop.depth;
-      if (ascentDistance > 0) {
-        const ascentTime = (ascentDistance / 9) * 60;
+    // Exception 1: First ascent from bottom to first decompression stop (independent)
+    if (stops.length > 0) {
+      const firstStop = stops[0];
+      const firstAscentDistance = currentDepth - firstStop.depth;
+      if (firstAscentDistance > 0) {
+        const firstAscentTime = (firstAscentDistance / 9) * 60;
         timeline.push({
           type: 'ascent',
           fromDepth: currentDepth,
-          toDepth: stop.depth,
-          time: ascentTime,
+          toDepth: firstStop.depth,
+          time: firstAscentTime,
           speed: 9,
           gas: 'Aire',
-          description: `Ascenso de ${currentDepth}m a ${stop.depth}m (9 m/min)`
+          description: `Ascenso inicial de ${currentDepth}m a ${firstStop.depth}m (9 m/min)`,
+          hasCountdownTimer: true,
+          requiredTime: firstAscentTime,
+          isIndependentAscent: true
         });
+        currentDepth = firstStop.depth;
       }
+    }
 
+    stops.forEach((stop, index) => {
       // Determine gas type: O₂ at 9m and 6m, Air for deeper stops
       const gas = (stop.depth <= 9) ? 'O₂' : 'Aire';
 
       if (gas === 'O₂') {
-        // Add Travel/Shift/Vent period before O₂ (COUNT-UP TIMER)
-        timeline.push({
-          type: 'travel_shift_vent',
-          depth: stop.depth,
-          time: 0, // Count-up timer starts at 0
-          gas: 'Aire',
-          description: `Travel/Shift/Vent - Cambio a O₂`,
-          isTimer: true,
-          timerType: 'countUp',
-          warningThreshold: 180 // 3 minutes
-        });
+        // Add Travel/Shift/Vent period before O₂ (COUNT-UP TIMER) - only for first O₂ stop
+        if (index === 0 || stops[index - 1].depth > 9) {
+          timeline.push({
+            type: 'travel_shift_vent',
+            depth: stop.depth,
+            time: 0, // Count-up timer starts at 0
+            gas: 'Aire',
+            description: `Travel/Shift/Vent - Cambio a O₂ en ${stop.depth}m`,
+            isTimer: true,
+            timerType: 'countUp',
+            warningThreshold: 180 // 3 minutes
+          });
+        }
 
         // Calculate O₂ segments with breaks
         const { segments } = this.calculateO2Segments(stop.time);
-        segments.forEach(segment => {
-          timeline.push({
-            type: segment.type,
-            depth: stop.depth,
-            time: segment.time * 60, // Convert to seconds
-            gas: segment.gas,
-            description: segment.description,
-            hasCountdownTimer: segment.type === 'o2_period' || segment.type === 'air_break',
-            requiredTime: segment.time * 60
+        
+        if (index === 0) {
+          // First stop (no ascent merged, already handled above)
+          segments.forEach(segment => {
+            timeline.push({
+              type: segment.type,
+              depth: stop.depth,
+              time: segment.time * 60, // Convert to seconds
+              gas: segment.gas,
+              description: segment.description,
+              hasCountdownTimer: segment.type === 'o2_period' || segment.type === 'air_break',
+              requiredTime: segment.time * 60
+            });
           });
-        });
+        } else {
+          // Intermediate stops: merge ascent time with first O₂ period
+          const ascentDistance = currentDepth - stop.depth;
+          const ascentTime = ascentDistance > 0 ? (ascentDistance / 9) * 60 : 0;
+          
+          let isFirstSegment = true;
+          segments.forEach(segment => {
+            if (isFirstSegment && segment.type === 'o2_period') {
+              // Merge ascent with first O₂ period
+              const totalTime = ascentTime + (segment.time * 60);
+              timeline.push({
+                type: 'merged_o2_stop',
+                depth: stop.depth,
+                fromDepth: currentDepth,
+                time: totalTime,
+                gas: segment.gas,
+                description: `Ascenso de ${currentDepth}m a ${stop.depth}m + ${segment.description} (${this.formatTime(totalTime)} total)`,
+                hasCountdownTimer: true,
+                requiredTime: totalTime,
+                ascentTime: ascentTime,
+                stopTime: segment.time * 60,
+                details: {
+                  ascent: `${this.formatTime(ascentTime)} ascenso (9 m/min)`,
+                  stop: `${this.formatTime(segment.time * 60)} ${segment.description}`
+                }
+              });
+              isFirstSegment = false;
+            } else {
+              // Regular segment
+              timeline.push({
+                type: segment.type,
+                depth: stop.depth,
+                time: segment.time * 60,
+                gas: segment.gas,
+                description: segment.description,
+                hasCountdownTimer: segment.type === 'o2_period' || segment.type === 'air_break',
+                requiredTime: segment.time * 60
+              });
+            }
+          });
+        }
       } else {
-        // Regular air stop with countdown timer
+        // Regular air stop
         const stopTimeSeconds = stop.time * 60;
-        timeline.push({
-          type: 'stop',
-          depth: stop.depth,
-          time: stopTimeSeconds,
-          gas: gas,
-          description: `Parada de descompresión en ${stop.depth}m con ${gas}`,
-          hasCountdownTimer: true,
-          requiredTime: stopTimeSeconds
-        });
+        
+        if (index === 0) {
+          // First stop (no ascent merged)
+          timeline.push({
+            type: 'stop',
+            depth: stop.depth,
+            time: stopTimeSeconds,
+            gas: gas,
+            description: `Parada de descompresión en ${stop.depth}m con ${gas}`,
+            hasCountdownTimer: true,
+            requiredTime: stopTimeSeconds
+          });
+        } else {
+          // Intermediate stops: merge ascent time with stop time
+          const ascentDistance = currentDepth - stop.depth;
+          const ascentTime = ascentDistance > 0 ? (ascentDistance / 9) * 60 : 0;
+          const totalTime = ascentTime + stopTimeSeconds;
+          
+          timeline.push({
+            type: 'merged_stop',
+            depth: stop.depth,
+            fromDepth: currentDepth,
+            time: totalTime,
+            gas: gas,
+            description: `Ascenso de ${currentDepth}m a ${stop.depth}m + Parada con ${gas} (${this.formatTime(totalTime)} total)`,
+            hasCountdownTimer: true,
+            requiredTime: totalTime,
+            ascentTime: ascentTime,
+            stopTime: stopTimeSeconds,
+            details: {
+              ascent: `${this.formatTime(ascentTime)} ascenso (9 m/min)`,
+              stop: `${this.formatTime(stopTimeSeconds)} parada descompresión`
+            }
+          });
+        }
       }
 
       currentDepth = stop.depth;
     });
 
-    // Final ascent to surface at 9 m/min
+    // Exception 2: Final ascent to surface (independent)
     if (currentDepth > 0) {
       const finalAscentTime = (currentDepth / 9) * 60;
       timeline.push({
@@ -483,7 +562,10 @@ class USNavyCalculatorService {
         time: finalAscentTime,
         speed: 9,
         gas: 'Aire',
-        description: `Ascenso final a superficie (9 m/min)`
+        description: `Ascenso final a superficie de ${currentDepth}m (9 m/min)`,
+        hasCountdownTimer: true,
+        requiredTime: finalAscentTime,
+        isIndependentAscent: true
       });
     }
 
