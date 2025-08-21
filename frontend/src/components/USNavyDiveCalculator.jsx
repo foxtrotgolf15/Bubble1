@@ -759,59 +759,92 @@ const USNavyDiveCalculator = () => {
               <div className={`border rounded-lg p-4 ${backgroundColor}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      {(segment.type === 'ascent' || segment.type === 'merged_stop' || segment.type === 'merged_o2_stop') && <ArrowRight className="h-4 w-4 text-blue-600" />}
-                      {segment.type === 'stop' && <Clock className="h-4 w-4 text-orange-600" />}
-                      {(segment.type === 'o2_period' || segment.type === 'chamber_o2_period') && <Timer className="h-4 w-4 text-green-600" />}
-                      {segment.type === 'air_break' && <Clock className="h-4 w-4 text-yellow-600" />}
-                      {segment.type === 'compression' && <ArrowRight className="h-4 w-4 text-purple-600 rotate-90" />}
-                      {segment.type === 'surface_interval' && <AlertCircle className="h-4 w-4 text-cyan-600" />}
-                      {segment.type === 'travel_shift_vent' && <Timer className="h-4 w-4 text-blue-600" />}
-                      {(segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition') && <ArrowRight className="h-4 w-4 text-red-600" />}
-                      <span className="font-medium text-slate-800">
-                        {segment.description}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
-                      <div className="flex items-center gap-1">
-                        <Gauge className="h-3 w-3" />
-                        {segment.type === 'ascent' || segment.type === 'compression' || segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition' || segment.type === 'merged_stop' || segment.type === 'merged_o2_stop'
-                          ? `${segment.fromDepth}m → ${segment.toDepth || segment.depth}m`
-                          : `${segment.depth}m`
-                        }
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {(segment.isTimer || segment.isTransitionTimer) && segment.timerType === 'countUp' 
-                          ? 'Cronómetro' 
-                          : USNavyCalculatorService.formatTime(segment.time)
-                        }
-                      </div>
-                      <Badge variant={segment.gas === 'O₂' ? 'default' : 'secondary'}>
-                        {segment.gas}
-                      </Badge>
-                      {segment.speed && (
-                        <div className="text-xs text-slate-500">
-                          {segment.speed} m/min
+                    {/* Render merged blocks with two separate rows */}
+                    {(segment.type === 'merged_stop' || segment.type === 'merged_o2_stop') ? (
+                      <div className="space-y-1">
+                        {/* Row 1: Ascent */}
+                        <div className="flex items-center gap-2">
+                          <ArrowRight className="h-4 w-4 text-blue-600" />
+                          <span className="font-medium text-slate-800">
+                            Ascenso: {segment.fromDepth}m → {segment.depth}m
+                          </span>
+                          <div className="text-sm text-slate-600">
+                            ({USNavyCalculatorService.formatTime(segment.ascentTime)} a 9 m/min)
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    
-                    {/* Show breakdown details for merged stops */}
-                    {(segment.type === 'merged_stop' || segment.type === 'merged_o2_stop') && segment.details && (
-                      <div className="mt-2 text-xs text-slate-600 bg-white bg-opacity-50 p-2 rounded border">
-                        <div>• {segment.details.ascent}</div>
-                        <div>• {segment.details.stop}</div>
-                        <div className="font-medium text-blue-700 mt-1">ℹ️ Temporizador incluye ascenso + parada</div>
+                        
+                        {/* Row 2: Stop */}
+                        <div className="flex items-center gap-2 ml-6">
+                          {segment.gas === 'O₂' ? (
+                            <Timer className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Clock className="h-4 w-4 text-orange-600" />
+                          )}
+                          <span className="font-medium text-slate-800">
+                            Parada: {segment.depth}m / {USNavyCalculatorService.formatTime(segment.stopTime)}
+                          </span>
+                          <Badge variant={segment.gas === 'O₂' ? 'default' : 'secondary'}>
+                            {segment.gas}
+                          </Badge>
+                        </div>
+                        
+                        {/* Combined timing info */}
+                        <div className="ml-6 mt-2 text-sm text-slate-600">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>Tiempo total: {USNavyCalculatorService.formatTime(segment.time)}</span>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    
-                    {/* Show transition details for unified SurDO₂ block */}
-                    {segment.type === 'surdo2_unified_transition' && segment.details && (
-                      <div className="mt-2 text-xs text-slate-600 bg-white bg-opacity-50 p-2 rounded border">
-                        <div>• Ascenso {segment.fromDepth}m → Superficie: {USNavyCalculatorService.formatTime(segment.details.ascentTime)} ({segment.details.ascentSpeed} m/min)</div>
-                        <div>• Intervalo superficie + Compresión cámara: {USNavyCalculatorService.formatTime(segment.details.compressionTime)}</div>
-                        <div className="font-medium text-red-700 mt-1">⚠️ Cronometrar tiempo total de transición</div>
+                    ) : (
+                      /* Regular single-row blocks */
+                      <div>
+                        <div className="flex items-center gap-2">
+                          {segment.type === 'ascent' && <ArrowRight className="h-4 w-4 text-blue-600" />}
+                          {segment.type === 'stop' && <Clock className="h-4 w-4 text-orange-600" />}
+                          {(segment.type === 'o2_period' || segment.type === 'chamber_o2_period') && <Timer className="h-4 w-4 text-green-600" />}
+                          {segment.type === 'air_break' && <Clock className="h-4 w-4 text-yellow-600" />}
+                          {segment.type === 'compression' && <ArrowRight className="h-4 w-4 text-purple-600 rotate-90" />}
+                          {segment.type === 'surface_interval' && <AlertCircle className="h-4 w-4 text-cyan-600" />}
+                          {segment.type === 'travel_shift_vent' && <Timer className="h-4 w-4 text-blue-600" />}
+                          {(segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition') && <ArrowRight className="h-4 w-4 text-red-600" />}
+                          <span className="font-medium text-slate-800">
+                            {segment.description}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
+                          <div className="flex items-center gap-1">
+                            <Gauge className="h-3 w-3" />
+                            {segment.type === 'ascent' || segment.type === 'compression' || segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition'
+                              ? `${segment.fromDepth}m → ${segment.toDepth || segment.depth}m`
+                              : `${segment.depth}m`
+                            }
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {(segment.isTimer || segment.isTransitionTimer) && segment.timerType === 'countUp' 
+                              ? 'Cronómetro' 
+                              : USNavyCalculatorService.formatTime(segment.time)
+                            }
+                          </div>
+                          <Badge variant={segment.gas === 'O₂' ? 'default' : 'secondary'}>
+                            {segment.gas}
+                          </Badge>
+                          {segment.speed && (
+                            <div className="text-xs text-slate-500">
+                              {segment.speed} m/min
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Show transition details for unified SurDO₂ block */}
+                        {segment.type === 'surdo2_unified_transition' && segment.details && (
+                          <div className="mt-2 text-xs text-slate-600 bg-white bg-opacity-50 p-2 rounded border">
+                            <div>• Ascenso {segment.fromDepth}m → Superficie: {USNavyCalculatorService.formatTime(segment.details.ascentTime)} ({segment.details.ascentSpeed} m/min)</div>
+                            <div>• Intervalo superficie + Compresión cámara: {USNavyCalculatorService.formatTime(segment.details.compressionTime)}</div>
+                            <div className="font-medium text-red-700 mt-1">⚠️ Cronometrar tiempo total de transición</div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
