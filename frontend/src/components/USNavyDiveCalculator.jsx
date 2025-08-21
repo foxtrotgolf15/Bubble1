@@ -151,7 +151,7 @@ const USNavyDiveCalculator = () => {
   };
 
   // Count-up Timer Component
-  const CountUpTimerComponent = ({ segment, index, onWarning, onError, onPopup, compact = false }) => {
+  const CountUpTimerComponent = ({ segment, index, onWarning, onError, onPopup, embedded = false }) => {
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [hasWarned, setHasWarned] = useState(false);
@@ -235,6 +235,65 @@ const USNavyDiveCalculator = () => {
       return 'text-blue-600';
     };
 
+    if (!segment.isTimer) return null;
+
+    // Embedded layout inside timeline boxes (right-aligned)
+    if (embedded) {
+      return (
+        <div className="text-right">
+          <div className={`text-lg font-mono font-bold ${getStatusColor()}`}>
+            {formatTime(elapsedSeconds)}
+          </div>
+          <div className="flex gap-1 mt-1 justify-end">
+            <Button
+              onClick={startTimer}
+              disabled={isRunning}
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white px-1 py-0.5 text-xs h-6"
+            >
+              <Play className="w-2 h-2" />
+            </Button>
+            <Button
+              onClick={pauseTimer}
+              disabled={!isRunning}
+              size="sm"
+              variant="outline"
+              className="px-1 py-0.5 text-xs h-6"
+            >
+              <Pause className="w-2 h-2" />
+            </Button>
+            <Button
+              onClick={resetTimer}
+              size="sm"
+              variant="outline"
+              className="px-1 py-0.5 text-xs h-6"
+            >
+              <RotateCcw className="w-2 h-2" />
+            </Button>
+          </div>
+          {(hasWarned || hasErrored) && (
+            <Badge variant="secondary" className={`mt-1 text-xs ${hasErrored ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800"}`}>
+              {hasErrored ? "Error" : "Advertencia"}
+            </Badge>
+          )}
+          
+          {/* Warning/Error Messages for embedded timers */}
+          {segment.type === 'travel_shift_vent' && hasWarned && (
+            <div className="mt-1 text-red-600 text-xs">
+              ⚠️ >3 min
+            </div>
+          )}
+          
+          {segment.type === 'surface_interval' && hasErrored && (
+            <div className="mt-1 text-red-600 text-xs">
+              🚨 >7 min: TT5/TT6
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Full layout for standalone timers (unchanged existing design)
     const getBackgroundColor = () => {
       if (segment.type === 'surface_interval') {
         if (hasErrored) return 'bg-red-50 border-red-200';
@@ -247,54 +306,6 @@ const USNavyDiveCalculator = () => {
       return 'bg-blue-50 border-blue-200';
     };
 
-    if (!segment.isTimer) return null;
-
-    // Compact layout for right side positioning
-    if (compact) {
-      return (
-        <div className={`border rounded-lg p-2 ${getBackgroundColor()}`}>
-          <div className="text-center">
-            <div className={`text-lg font-mono font-bold ${getStatusColor()}`}>
-              {formatTime(elapsedSeconds)}
-            </div>
-            <div className="flex gap-1 mt-1 justify-center">
-              <Button
-                onClick={startTimer}
-                disabled={isRunning}
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white px-1 py-0.5 text-xs h-6"
-              >
-                <Play className="w-2 h-2" />
-              </Button>
-              <Button
-                onClick={pauseTimer}
-                disabled={!isRunning}
-                size="sm"
-                variant="outline"
-                className="px-1 py-0.5 text-xs h-6"
-              >
-                <Pause className="w-2 h-2" />
-              </Button>
-              <Button
-                onClick={resetTimer}
-                size="sm"
-                variant="outline"
-                className="px-1 py-0.5 text-xs h-6"
-              >
-                <RotateCcw className="w-2 h-2" />
-              </Button>
-            </div>
-            {(hasWarned || hasErrored) && (
-              <Badge variant="secondary" className={`mt-1 text-xs ${hasErrored ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800"}`}>
-                {hasErrored ? "Error" : "Advertencia"}
-              </Badge>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    // Full layout for standalone timers
     return (
       <div className={`border rounded-lg p-3 mt-2 ${getBackgroundColor()}`}>
         <div className="flex items-center justify-between mb-2">
