@@ -252,7 +252,7 @@ const USNavyDiveCalculator = () => {
     const resetTimer = () => {
       setIsRunning(false);
       setElapsedSeconds(0);
-      setCountdownSeconds(segment.requiredTime || 0);
+      setCountdownSeconds(Math.round(segment.requiredTime || 0));
       setHasWarned(false);
       setHasErrored(false);
       setHasTriggeredPopup(false);
