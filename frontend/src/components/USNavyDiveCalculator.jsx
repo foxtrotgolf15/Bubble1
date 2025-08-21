@@ -758,7 +758,7 @@ const USNavyDiveCalculator = () => {
                     </div>
                   </div>
                   
-                  {/* Timer positioned on the right side */}
+                  {/* Timer embedded inside the box on the right side - only for countdown/timer items */}
                   {segment.isTimer && (
                     <div className="ml-4 flex-shrink-0">
                       <CountUpTimerComponent 
@@ -767,23 +767,12 @@ const USNavyDiveCalculator = () => {
                         onWarning={handleTimerWarning}
                         onError={handleTimerError}
                         onPopup={handleTimerPopup}
-                        compact={true}
+                        embedded={true}
                       />
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* Count-up Timer Component - Only if not already rendered on the right */}
-              {!segment.isTimer && (
-                <CountUpTimerComponent 
-                  segment={segment}
-                  index={index}
-                  onWarning={handleTimerWarning}
-                  onError={handleTimerError}
-                  onPopup={handleTimerPopup}
-                />
-              )}
             </div>
           );
         })}
