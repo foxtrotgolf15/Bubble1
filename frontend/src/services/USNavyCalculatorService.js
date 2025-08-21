@@ -883,12 +883,21 @@ class USNavyCalculatorService {
   }
 
   /**
-   * Format time in mm:ss format
+   * Format time from seconds to MM:SS format (static method)
+   */
+  static formatTime(seconds) {
+    // Ensure we have a number and round to nearest second
+    const totalSeconds = Math.round(Number(seconds) || 0);
+    const minutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  /**
+   * Format time from seconds to MM:SS format (instance method for internal use)
    */
   formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return USNavyCalculatorService.formatTime(seconds);
   }
 
   /**
