@@ -554,7 +554,7 @@ class USNavyCalculatorService {
 
     // Exception 2: Final ascent to surface (independent)
     if (currentDepth > 0) {
-      const finalAscentTime = (currentDepth / 9) * 60;
+      const finalAscentTime = Math.round((currentDepth / 9) * 60);
       timeline.push({
         type: 'ascent',
         fromDepth: currentDepth,
