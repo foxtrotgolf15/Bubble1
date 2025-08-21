@@ -662,44 +662,34 @@ class USNavyCalculatorService {
       currentDepth = stop.depth;
     });
 
-    // Determine ascent speed from current depth to surface
-    let ascentSpeed = 9; // Default 9 m/min
+    // SurDO₂ ASCENT RATE LOGIC: From 12.2m (40 fsw) to surface at 12 m/min (40 fpm)
+    // All ascents to 12.2m use standard 9 m/min, final ascent to surface uses 12 m/min
     
-    // Check if we have a 12.2m (40fsw) stop
-    const has12_2mStop = stops.some(stop => stop.depth === 12.2);
-    
-    if (has12_2mStop) {
-      // If 40 fsw stop required: ascend 40 fsw → surface at 40 fsw/min (≈12 m/min)
-      ascentSpeed = 12;
-    } else {
-      // If no 40 fsw stop: ascend bottom → 40 fsw at 30 fsw/min (≈9 m/min), then 40 fsw → surface at 40 fsw/min
-      if (currentDepth > 12.2) {
-        // First ascent to 12.2m at 9 m/min - this becomes a merged stop with the virtual 12.2m stop
-        const ascentTo12_2Time = Math.round(((currentDepth - 12.2) / 9) * 60);
-        timeline.push({
-          type: 'merged_stop',
-          depth: 12.2,
-          fromDepth: currentDepth,
-          time: ascentTo12_2Time,
-          gas: 'Aire',
-          description: `Ascenso de ${currentDepth}m a 12.2m (${this.formatTime(ascentTo12_2Time)} total)`,
-          hasCountdownTimer: true,
-          requiredTime: ascentTo12_2Time,
-          ascentTime: ascentTo12_2Time,
-          stopTime: 0,
-          details: {
-            ascent: `${this.formatTime(ascentTo12_2Time)} ascenso (9 m/min)`,
-            stop: `Sin parada requerida`
-          }
-        });
-        currentDepth = 12.2;
-      }
-      ascentSpeed = 12; // Then 12.2m to surface at 12 m/min
+    if (currentDepth > 12.2) {
+      // First ensure we get to 12.2m at standard 9 m/min
+      const ascentTo12_2Time = Math.round(((currentDepth - 12.2) / 9) * 60);
+      timeline.push({
+        type: 'merged_stop',
+        depth: 12.2,
+        fromDepth: currentDepth,
+        time: ascentTo12_2Time,
+        gas: 'Aire',
+        description: `Ascenso de ${currentDepth}m a 12.2m (${this.formatTime(ascentTo12_2Time)} total)`,
+        hasCountdownTimer: true,
+        requiredTime: ascentTo12_2Time,
+        ascentTime: ascentTo12_2Time,
+        stopTime: 0,
+        details: {
+          ascent: `${this.formatTime(ascentTo12_2Time)} ascenso (9 m/min)`,
+          stop: `Sin parada requerida`
+        }
+      });
+      currentDepth = 12.2;
     }
 
-    // UNIFIED SurDO₂ TRANSITION BLOCK - combining ascent + surface interval + compression
-    const surfaceAscentTime = (currentDepth / ascentSpeed) * 60;
-    const compressionTime = (15 / 30) * 60; // 30 m/min descent rate
+    // SurDO₂ TRANSFER: 12.2m → surface at 12 m/min, then rapid compression to 15m at 30 m/min
+    const surfaceAscentTime = Math.round((currentDepth / 12) * 60); // 12 m/min for SurDO₂
+    const compressionTime = Math.round((15 / 30) * 60); // 30 m/min rapid compression
     
     timeline.push({
       type: 'surdo2_unified_transition',
