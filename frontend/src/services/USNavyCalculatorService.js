@@ -285,14 +285,16 @@ class USNavyCalculatorService {
         });
       }
 
-      // Decompression stop
+      // Decompression stop with countdown timer
       const stopTimeSeconds = stop.time * 60;
       timeline.push({
         type: 'stop',
         depth: stop.depth,
         time: stopTimeSeconds,
         gas: 'Aire',
-        description: `Parada de descompresión en ${stop.depth}m`
+        description: `Parada de descompresión en ${stop.depth}m`,
+        hasCountdownTimer: true,
+        requiredTime: stopTimeSeconds
       });
       currentDepth = stop.depth;
     });
