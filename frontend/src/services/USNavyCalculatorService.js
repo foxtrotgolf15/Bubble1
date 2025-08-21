@@ -600,33 +600,65 @@ class USNavyCalculatorService {
     // Phase 1: In-water decompression (complete all stops at 12.2m and deeper)
     const deepStops = stops.filter(stop => stop.depth >= 12.2);
     
-    deepStops.forEach(stop => {
-      // Ascent to stop at 9 m/min
-      const ascentDistance = currentDepth - stop.depth;
-      if (ascentDistance > 0) {
-        const ascentTime = (ascentDistance / 9) * 60;
+    // Exception 1: First ascent from bottom to first decompression stop (independent)
+    if (deepStops.length > 0) {
+      const firstStop = deepStops[0];
+      const firstAscentDistance = currentDepth - firstStop.depth;
+      if (firstAscentDistance > 0) {
+        const firstAscentTime = (firstAscentDistance / 9) * 60;
         timeline.push({
           type: 'ascent',
           fromDepth: currentDepth,
-          toDepth: stop.depth,
-          time: ascentTime,
+          toDepth: firstStop.depth,
+          time: firstAscentTime,
           speed: 9,
           gas: 'Aire',
-          description: `Ascenso de ${currentDepth}m a ${stop.depth}m (9 m/min)`
+          description: `Ascenso inicial de ${currentDepth}m a ${firstStop.depth}m (9 m/min)`,
+          hasCountdownTimer: true,
+          requiredTime: firstAscentTime,
+          isIndependentAscent: true
+        });
+        currentDepth = firstStop.depth;
+      }
+    }
+    
+    deepStops.forEach((stop, index) => {
+      if (index === 0) {
+        // First stop (no ascent merged, already handled above)
+        const stopTimeSeconds = stop.time * 60;
+        timeline.push({
+          type: 'stop',
+          depth: stop.depth,
+          time: stopTimeSeconds,
+          gas: 'Aire',
+          description: `Parada de descompresión en ${stop.depth}m`,
+          hasCountdownTimer: true,
+          requiredTime: stopTimeSeconds
+        });
+      } else {
+        // Intermediate stops: merge ascent time with stop time
+        const ascentDistance = currentDepth - stop.depth;
+        const ascentTime = ascentDistance > 0 ? (ascentDistance / 9) * 60 : 0;
+        const stopTimeSeconds = stop.time * 60;
+        const totalTime = ascentTime + stopTimeSeconds;
+        
+        timeline.push({
+          type: 'merged_stop',
+          depth: stop.depth,
+          fromDepth: currentDepth,
+          time: totalTime,
+          gas: 'Aire',
+          description: `Ascenso de ${currentDepth}m a ${stop.depth}m + Parada (${this.formatTime(totalTime)} total)`,
+          hasCountdownTimer: true,
+          requiredTime: totalTime,
+          ascentTime: ascentTime,
+          stopTime: stopTimeSeconds,
+          details: {
+            ascent: `${this.formatTime(ascentTime)} ascenso (9 m/min)`,
+            stop: `${this.formatTime(stopTimeSeconds)} parada descompresión`
+          }
         });
       }
-
-      // Decompression stop with countdown timer
-      const stopTimeSeconds = stop.time * 60;
-      timeline.push({
-        type: 'stop',
-        depth: stop.depth,
-        time: stopTimeSeconds,
-        gas: 'Aire',
-        description: `Parada de descompresión en ${stop.depth}m`,
-        hasCountdownTimer: true,
-        requiredTime: stopTimeSeconds
-      });
       currentDepth = stop.depth;
     });
 
@@ -642,16 +674,23 @@ class USNavyCalculatorService {
     } else {
       // If no 40 fsw stop: ascend bottom → 40 fsw at 30 fsw/min (≈9 m/min), then 40 fsw → surface at 40 fsw/min
       if (currentDepth > 12.2) {
-        // First ascent to 12.2m at 9 m/min
+        // First ascent to 12.2m at 9 m/min - this becomes a merged stop with the virtual 12.2m stop
         const ascentTo12_2Time = ((currentDepth - 12.2) / 9) * 60;
         timeline.push({
-          type: 'ascent',
+          type: 'merged_stop',
+          depth: 12.2,
           fromDepth: currentDepth,
-          toDepth: 12.2,
           time: ascentTo12_2Time,
-          speed: 9,
           gas: 'Aire',
-          description: `Ascenso de ${currentDepth}m a 12.2m (9 m/min)`
+          description: `Ascenso de ${currentDepth}m a 12.2m (${this.formatTime(ascentTo12_2Time)} total)`,
+          hasCountdownTimer: true,
+          requiredTime: ascentTo12_2Time,
+          ascentTime: ascentTo12_2Time,
+          stopTime: 0,
+          details: {
+            ascent: `${this.formatTime(ascentTo12_2Time)} ascenso (9 m/min)`,
+            stop: `Sin parada requerida`
+          }
         });
         currentDepth = 12.2;
       }
@@ -829,7 +868,10 @@ class USNavyCalculatorService {
       time: finalAscentTime,
       speed: 30,
       gas: 'Aire',
-      description: `Ascenso final a superficie en cámara (30 m/min)`
+      description: `Ascenso final a superficie en cámara (30 m/min)`,
+      hasCountdownTimer: true,
+      requiredTime: finalAscentTime,
+      isIndependentAscent: true
     });
 
     // Calculate total time by summing ALL fixed-duration segments (excluding count-up timers)
