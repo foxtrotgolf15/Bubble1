@@ -842,8 +842,8 @@ const USNavyDiveCalculator = () => {
                         {segment.type === 'surdo2_unified_transition' && segment.details && (
                           <div className="mt-2 text-xs text-slate-600 bg-white bg-opacity-50 p-2 rounded border">
                             <div>• Ascenso {segment.fromDepth}m → Superficie: {USNavyCalculatorService.formatTime(segment.details.ascentTime)} ({segment.details.ascentSpeed} m/min)</div>
-                            <div>• Intervalo superficie + Compresión cámara: {USNavyCalculatorService.formatTime(segment.details.compressionTime)}</div>
-                            <div className="font-medium text-red-700 mt-1">⚠️ Cronometrar tiempo total de transición</div>
+                            <div>• Compresión rápida Superficie → 15m: {USNavyCalculatorService.formatTime(segment.details.compressionTime)} ({segment.details.compressionSpeed} m/min)</div>
+                            <div className="font-medium text-red-700 mt-1">⚠️ Cronometrar tiempo total de transición (5-7 min)</div>
                           </div>
                         )}
                       </div>
