@@ -711,7 +711,7 @@ const USNavyDiveCalculator = () => {
             backgroundColor = 'bg-green-100 border-green-300'; // O₂ periods in water → bright green
           } else if (segment.type === 'chamber_o2_period' && segment.gas === 'O₂') {
             backgroundColor = 'bg-yellow-100 border-yellow-300'; // Chamber O₂ stops → yellow
-          } else if (segment.type === 'surdo2_transfer') {
+          } else if (segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition') {
             backgroundColor = 'bg-red-100 border-red-300'; // Transfer from 12.2m to chamber → red
           } else if (segment.type === 'ascent') {
             backgroundColor = 'bg-blue-50 border-blue-200';
@@ -738,7 +738,7 @@ const USNavyDiveCalculator = () => {
                       {segment.type === 'compression' && <ArrowRight className="h-4 w-4 text-purple-600 rotate-90" />}
                       {segment.type === 'surface_interval' && <AlertCircle className="h-4 w-4 text-cyan-600" />}
                       {segment.type === 'travel_shift_vent' && <Timer className="h-4 w-4 text-blue-600" />}
-                      {segment.type === 'surdo2_transfer' && <ArrowRight className="h-4 w-4 text-red-600" />}
+                      {(segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition') && <ArrowRight className="h-4 w-4 text-red-600" />}
                       <span className="font-medium text-slate-800">
                         {segment.description}
                       </span>
@@ -746,15 +746,15 @@ const USNavyDiveCalculator = () => {
                     <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
                       <div className="flex items-center gap-1">
                         <Gauge className="h-3 w-3" />
-                        {segment.type === 'ascent' || segment.type === 'compression' || segment.type === 'surdo2_transfer'
+                        {segment.type === 'ascent' || segment.type === 'compression' || segment.type === 'surdo2_transfer' || segment.type === 'surdo2_unified_transition'
                           ? `${segment.fromDepth}m → ${segment.toDepth}m`
                           : `${segment.depth}m`
                         }
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {segment.isTimer && segment.timerType === 'countUp' 
-                          ? 'Temporizador' 
+                        {(segment.isTimer || segment.isTransitionTimer) && segment.timerType === 'countUp' 
+                          ? 'Cronómetro' 
                           : USNavyCalculatorService.formatTime(segment.time)
                         }
                       </div>
@@ -767,17 +767,27 @@ const USNavyDiveCalculator = () => {
                         </div>
                       )}
                     </div>
+                    
+                    {/* Show transition details for unified SurDO₂ block */}
+                    {segment.type === 'surdo2_unified_transition' && segment.details && (
+                      <div className="mt-2 text-xs text-slate-600 bg-white bg-opacity-50 p-2 rounded border">
+                        <div>• Ascenso {segment.fromDepth}m → Superficie: {USNavyCalculatorService.formatTime(segment.details.ascentTime)} ({segment.details.ascentSpeed} m/min)</div>
+                        <div>• Intervalo superficie + Compresión cámara: {USNavyCalculatorService.formatTime(segment.details.compressionTime)}</div>
+                        <div className="font-medium text-red-700 mt-1">⚠️ Cronometrar tiempo total de transición</div>
+                      </div>
+                    )}
                   </div>
                   
-                  {/* Timer embedded inside the box on the right side - only for countdown/timer items */}
-                  {segment.isTimer && (
+                  {/* Timer embedded inside the box on the right side */}
+                  {(segment.isTimer || segment.isTransitionTimer || segment.hasCountdownTimer) && (
                     <div className="ml-4 flex-shrink-0">
-                      <CountUpTimerComponent 
+                      <TimerComponent 
                         segment={segment}
                         index={index}
                         onWarning={handleTimerWarning}
                         onError={handleTimerError}
                         onPopup={handleTimerPopup}
+                        onTransitionAdjustment={handleTransitionAdjustment}
                         embedded={true}
                       />
                     </div>
