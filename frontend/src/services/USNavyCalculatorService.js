@@ -527,7 +527,7 @@ class USNavyCalculatorService {
         } else {
           // Intermediate stops: merge ascent time with stop time
           const ascentDistance = currentDepth - stop.depth;
-          const ascentTime = ascentDistance > 0 ? (ascentDistance / 9) * 60 : 0;
+          const ascentTime = ascentDistance > 0 ? Math.round((ascentDistance / 9) * 60) : 0;
           const totalTime = ascentTime + stopTimeSeconds;
           
           timeline.push({
