@@ -150,49 +150,86 @@ const USNavyDiveCalculator = () => {
     setErrors({});
   };
 
-  // Count-up Timer Component
-  const CountUpTimerComponent = ({ segment, index, onWarning, onError, onPopup, embedded = false }) => {
+  // Timer Component - handles both countdown timers for stops and count-up timers for transitions
+  const TimerComponent = ({ segment, index, onWarning, onError, onPopup, onTransitionAdjustment, embedded = false }) => {
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const [countdownSeconds, setCountdownSeconds] = useState(segment.requiredTime || 0);
     const [isRunning, setIsRunning] = useState(false);
     const [hasWarned, setHasWarned] = useState(false);
     const [hasErrored, setHasErrored] = useState(false);
     const [hasTriggeredPopup, setHasTriggeredPopup] = useState(false);
+    const [hasAdjusted, setHasAdjusted] = useState(false);
     const intervalRef = useRef(null);
+
+    // Determine timer type
+    const isCountdownTimer = segment.hasCountdownTimer;
+    const isTransitionTimer = segment.isTransitionTimer;
+    const isCountUpTimer = segment.isTimer && segment.timerType === 'countUp';
 
     useEffect(() => {
       if (isRunning) {
         intervalRef.current = setInterval(() => {
-          setElapsedSeconds(prev => {
-            const newElapsed = prev + 1;
-            
-            // Check thresholds based on timer type
-            if (segment.type === 'surface_interval') {
-              // Surface Interval logic
-              if (newElapsed >= 300 && !hasWarned) { // 5:00
-                setHasWarned(true);
-                if (onWarning) onWarning(segment, index, newElapsed);
+          if (isCountdownTimer) {
+            // Countdown timer logic
+            setCountdownSeconds(prev => {
+              const newCountdown = Math.max(0, prev - 1);
+              if (newCountdown === 0) {
+                // Timer completed - trigger alarm
+                setIsRunning(false);
+                if (onWarning) onWarning(segment, index, 'Timer completado');
+              }
+              return newCountdown;
+            });
+          } else {
+            // Count-up timer logic (for transitions and surface intervals)
+            setElapsedSeconds(prev => {
+              const newElapsed = prev + 1;
+              
+              if (isTransitionTimer && segment.transitionLogic) {
+                // SurDO₂ transition logic
+                if (newElapsed > 300 && newElapsed <= 420 && !hasWarned) { // 5-7 minutes
+                  setHasWarned(true);
+                  if (!hasAdjusted) {
+                    setHasAdjusted(true);
+                    if (onTransitionAdjustment) {
+                      onTransitionAdjustment(segment, index, newElapsed, 'extend_15min');
+                    }
+                  }
+                }
+                
+                if (newElapsed >= 420 && !hasErrored) { // ≥ 7 minutes
+                  setHasErrored(true);
+                  setIsRunning(false);
+                  if (onError) onError(segment, index, 'Aplicar tratamiento, posible enfermedad descompresiva');
+                }
+              } else if (segment.type === 'surface_interval') {
+                // Surface Interval logic
+                if (newElapsed >= 300 && !hasWarned) { // 5:00
+                  setHasWarned(true);
+                  if (onWarning) onWarning(segment, index, newElapsed);
+                }
+                
+                if (newElapsed > 420 && !hasErrored) { // 7:00
+                  setHasErrored(true);
+                  if (onError) onError(segment, index, newElapsed);
+                }
+                
+                // Popup trigger between 5-7 minutes (300-420 seconds)
+                if (newElapsed >= 300 && newElapsed <= 420 && !hasTriggeredPopup) {
+                  setHasTriggeredPopup(true);
+                  if (onPopup) onPopup(segment, index, newElapsed);
+                }
+              } else if (segment.type === 'travel_shift_vent') {
+                // Travel/Shift/Vent logic
+                if (newElapsed > 180 && !hasWarned) { // 3:00
+                  setHasWarned(true);
+                  if (onWarning) onWarning(segment, index, newElapsed);
+                }
               }
               
-              if (newElapsed > 420 && !hasErrored) { // 7:00
-                setHasErrored(true);
-                if (onError) onError(segment, index, newElapsed);
-              }
-              
-              // Popup trigger between 5-7 minutes (300-420 seconds)
-              if (newElapsed >= 300 && newElapsed <= 420 && !hasTriggeredPopup) {
-                setHasTriggeredPopup(true);
-                if (onPopup) onPopup(segment, index, newElapsed);
-              }
-            } else if (segment.type === 'travel_shift_vent') {
-              // Travel/Shift/Vent logic
-              if (newElapsed > 180 && !hasWarned) { // 3:00
-                setHasWarned(true);
-                if (onWarning) onWarning(segment, index, newElapsed);
-              }
-            }
-            
-            return newElapsed;
-          });
+              return newElapsed;
+            });
+          }
         }, 1000);
       } else {
         if (intervalRef.current) {
@@ -205,16 +242,18 @@ const USNavyDiveCalculator = () => {
           clearInterval(intervalRef.current);
         }
       };
-    }, [isRunning, hasWarned, hasErrored, hasTriggeredPopup, segment, index, onWarning, onError, onPopup]);
+    }, [isRunning, hasWarned, hasErrored, hasTriggeredPopup, hasAdjusted, segment, index, onWarning, onError, onPopup, onTransitionAdjustment, isCountdownTimer, isTransitionTimer]);
 
     const startTimer = () => setIsRunning(true);
     const pauseTimer = () => setIsRunning(false);
     const resetTimer = () => {
       setIsRunning(false);
       setElapsedSeconds(0);
+      setCountdownSeconds(segment.requiredTime || 0);
       setHasWarned(false);
       setHasErrored(false);
       setHasTriggeredPopup(false);
+      setHasAdjusted(false);
     };
 
     const formatTime = (seconds) => {
@@ -224,30 +263,50 @@ const USNavyDiveCalculator = () => {
     };
 
     const getStatusColor = () => {
-      if (segment.type === 'surface_interval') {
+      if (isCountdownTimer) {
+        if (countdownSeconds === 0) return 'text-green-600'; // Completed
+        if (countdownSeconds <= 60) return 'text-yellow-600'; // Last minute
+        return 'text-blue-600';
+      } else {
         if (hasErrored) return 'text-red-600';
         if (hasWarned) return 'text-yellow-600';
         return 'text-blue-600';
-      } else if (segment.type === 'travel_shift_vent') {
-        if (hasWarned) return 'text-red-600';
-        return 'text-blue-600';
       }
-      return 'text-blue-600';
     };
 
-    if (!segment.isTimer) return null;
+    const getDisplayTime = () => {
+      if (isCountdownTimer) {
+        return formatTime(countdownSeconds);
+      } else {
+        return formatTime(elapsedSeconds);
+      }
+    };
+
+    const getTimerLabel = () => {
+      if (isCountdownTimer) {
+        return countdownSeconds === 0 ? '¡COMPLETADO!' : 'Cuenta Regresiva';
+      } else if (isTransitionTimer) {
+        return 'Cronómetro Transición';
+      } else {
+        return 'Cronómetro';
+      }
+    };
+
+    // Don't render if no timer needed
+    if (!isCountdownTimer && !isTransitionTimer && !isCountUpTimer) return null;
 
     // Embedded layout inside timeline boxes (right-aligned)
     if (embedded) {
       return (
         <div className="text-right">
+          <div className="text-xs text-slate-500 mb-1">{getTimerLabel()}</div>
           <div className={`text-lg font-mono font-bold ${getStatusColor()}`}>
-            {formatTime(elapsedSeconds)}
+            {getDisplayTime()}
           </div>
           <div className="flex gap-1 mt-1 justify-end">
             <Button
               onClick={startTimer}
-              disabled={isRunning}
+              disabled={isRunning || (isCountdownTimer && countdownSeconds === 0)}
               size="sm"
               className="bg-green-600 hover:bg-green-700 text-white px-1 py-0.5 text-xs h-6"
             >
@@ -271,106 +330,66 @@ const USNavyDiveCalculator = () => {
               <RotateCcw className="w-2 h-2" />
             </Button>
           </div>
+          
+          {/* Status indicators */}
+          {isCountdownTimer && countdownSeconds === 0 && (
+            <Badge variant="secondary" className="mt-1 text-xs bg-green-100 text-green-800">
+              ¡Completado!
+            </Badge>
+          )}
+          
           {(hasWarned || hasErrored) && (
             <Badge variant="secondary" className={`mt-1 text-xs ${hasErrored ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800"}`}>
               {hasErrored ? "Error" : "Advertencia"}
             </Badge>
           )}
           
-          {/* Warning/Error Messages for embedded timers */}
-          {segment.type === 'travel_shift_vent' && hasWarned && (
-            <div className="mt-1 text-red-600 text-xs">
-              ⚠️ &gt;3 min
+          {/* Transition-specific messages */}
+          {isTransitionTimer && hasWarned && !hasErrored && (
+            <div className="mt-1 text-yellow-600 text-xs">
+              +15 min añadidos
             </div>
           )}
           
-          {segment.type === 'surface_interval' && hasErrored && (
+          {isTransitionTimer && hasErrored && (
             <div className="mt-1 text-red-600 text-xs">
-              🚨 &gt;7 min: TT5/TT6
+              🚨 Aplicar TT
             </div>
           )}
         </div>
       );
     }
 
-    // Full layout for standalone timers (unchanged existing design)
-    const getBackgroundColor = () => {
-      if (segment.type === 'surface_interval') {
-        if (hasErrored) return 'bg-red-50 border-red-200';
-        if (hasWarned) return 'bg-yellow-50 border-yellow-200';
-        return 'bg-cyan-50 border-cyan-200';
-      } else if (segment.type === 'travel_shift_vent') {
-        if (hasWarned) return 'bg-red-50 border-red-200';
-        return 'bg-blue-50 border-blue-200';
-      }
-      return 'bg-blue-50 border-blue-200';
-    };
+    return null; // Only embedded mode is used in this design
+  };
 
-    return (
-      <div className={`border rounded-lg p-3 mt-2 ${getBackgroundColor()}`}>
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="font-medium text-sm">
-            ⏱️ {segment.description}
-          </h4>
-          {(hasWarned || hasErrored) && (
-            <Badge variant="secondary" className={hasErrored ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800"}>
-              {hasErrored ? "Error" : "Advertencia"}
-            </Badge>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <div className={`text-xl font-mono font-bold ${getStatusColor()}`}>
-              {formatTime(elapsedSeconds)}
-            </div>
-          </div>
-
-          <div className="flex gap-1">
-            <Button
-              onClick={startTimer}
-              disabled={isRunning}
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 text-xs"
-            >
-              <Play className="w-3 h-3" />
-            </Button>
-            
-            <Button
-              onClick={pauseTimer}
-              disabled={!isRunning}
-              size="sm"
-              variant="outline"
-              className="px-2 py-1 text-xs"
-            >
-              <Pause className="w-3 h-3" />
-            </Button>
-            
-            <Button
-              onClick={resetTimer}
-              size="sm"
-              variant="outline"
-              className="px-2 py-1 text-xs"
-            >
-              <RotateCcw className="w-3 h-3" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Warning/Error Messages */}
-        {segment.type === 'travel_shift_vent' && hasWarned && (
-          <div className="mt-2 text-red-600 text-sm font-medium">
-            ⚠️ Excede el máximo de 3 min de Travel/Shift/Vent.
-          </div>
-        )}
-        
-        {segment.type === 'surface_interval' && hasErrored && (
-          <div className="mt-2 text-red-600 text-sm font-medium">
-            🚨 Ventana de transferencia excede 7 min: seguir protocolo TT5/TT6.
-          </div>
-        )}
-      </div>
-    );
+  // Handle transition adjustment callback
+  const handleTransitionAdjustment = (segment, index, elapsedTime, action) => {
+    if (action === 'extend_15min') {
+      // Find the adjustable period (first 15m O₂ period) and extend it
+      const updatedTimeline = results.timeline.map(item => {
+        if (item.isAdjustablePeriod && item.depth === 15) {
+          const extendedTime = item.baseTime + (15 * 60); // Add 15 minutes
+          return {
+            ...item,
+            time: extendedTime,
+            requiredTime: extendedTime,
+            description: `Período 1 de O₂ - 30 min en 15m (extendido por transición >5min)`
+          };
+        }
+        return item;
+      });
+      
+      // Update results with adjusted timeline
+      setResults(prev => ({
+        ...prev,
+        timeline: updatedTimeline
+      }));
+      
+      // Show notification
+      setNotificationMessage('Período de 15m extendido automáticamente por tiempo de transición >5 minutos');
+      setShowNotification(true);
+    }
   };
 
   const handleTimerWarning = (segment, index, elapsedSeconds) => {
