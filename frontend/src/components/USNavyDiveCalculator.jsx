@@ -280,13 +280,13 @@ const USNavyDiveCalculator = () => {
           {/* Warning/Error Messages for embedded timers */}
           {segment.type === 'travel_shift_vent' && hasWarned && (
             <div className="mt-1 text-red-600 text-xs">
-              ⚠️ >3 min
+              ⚠️ &gt;3 min
             </div>
           )}
           
           {segment.type === 'surface_interval' && hasErrored && (
             <div className="mt-1 text-red-600 text-xs">
-              🚨 >7 min: TT5/TT6
+              🚨 &gt;7 min: TT5/TT6
             </div>
           )}
         </div>
